@@ -16,7 +16,6 @@ setMethod("rankStabilityPlot", "list",
             
   plotData <- do.call(rbind, lapply(results, function(result)
   {
-    print("DOIN 1")
     if(is.list(result@rankedFeatures[[1]]))
       rankedFeatures <- unlist(result@rankedFeatures, recursive = FALSE)
     else
