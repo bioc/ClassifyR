@@ -103,7 +103,6 @@ setMethod("selectionPlot", "list",
   validationLabels <- c("Resample and Fold", "Resample and Split", "Leave Out")
   newValidLevels <- sapply(validationOrder, function(validation) grep(validation, validationLabels, ignore.case = TRUE))
   
-  
   plotData[, "dataset"] <- factor(plotData[, "dataset"], levels = unique(sapply(results, function(result) result@datasetName)))
   plotData[, "analysis"] <- factor(plotData[, "analysis"], levels = unique(sapply(results, function(result) result@classificationName)))
   plotData[, "validation"] <- gsub("fold", "Resample and Fold", plotData[, "validation"])
