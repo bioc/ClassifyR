@@ -20,7 +20,7 @@ extremeGradientBoostingTrainInterface <- function(measurementsTrain, outcomeTrai
     outcomeTrain <- time * ifelse(event == 1, 1, -1) # Negative for censoring.
     objective <- "survival:cox"
     trained <- xgboost::xgboost(measurementsTrain, outcomeTrain, objective = objective, nrounds = nrounds,
-                                colsample_bynode = mTryProportion, verbose = 0, ...)
+                                colsample_bynode = mTryProportion, verbose = 0, nthread = 1, ...)
   } else { # Classification task.
     isClassification <- TRUE
     classes <- levels(outcomeTrain)
@@ -28,7 +28,7 @@ extremeGradientBoostingTrainInterface <- function(measurementsTrain, outcomeTrai
     objective <- "multi:softprob"
     outcomeTrain <- as.numeric(outcomeTrain) - 1 # Classes are represented as 0, 1, 2, ...
     trained <- xgboost::xgboost(measurementsTrain, outcomeTrain, objective = objective, nrounds = nrounds,
-                              num_class = numClasses, colsample_bynode = mTryProportion, verbose = 0, ...)
+                              num_class = numClasses, colsample_bynode = mTryProportion, nthread = 1, verbose = 0, ...)
   }
 
   if(isClassification)
