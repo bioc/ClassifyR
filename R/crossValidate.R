@@ -557,6 +557,7 @@ generateModellingParams <- function(assayIDs,
         {
           if(is.null(classifierParams$trainParams@otherParams)) classifierParams$trainParams@otherParams <- extraParams[["train"]][paramIndex]
           else classifierParams$trainParams@otherParams[parameterName] <- parameter
+          if(parameterName %in% names(classifierParams$trainParams@tuneParams)) classifierParams$trainParams@tuneParams[[parameterName]] <- NULL
         } else if(length(parameter) > 1) {
           if(is.null(classifierParams$trainParams@tuneParams)) classifierParams$trainParams@tuneParams <- extraParams[["train"]][paramIndex]
           else classifierParams$trainParams@tuneParams[parameterName] <- parameter # Multiple values, so tune them.
@@ -578,6 +579,7 @@ generateModellingParams <- function(assayIDs,
         {
           if(is.null(classifierParams$predictParams@otherParams)) classifierParams$predictParams@otherParams <- extraParams[["predict"]][paramIndex]
           else classifierParams$predictParams@otherParams[parameterName] <- parameter
+          if(parameterName %in% names(classifierParams$predictParams@tuneParams)) classifierParams$predictParams@tuneParams[[parameterName]] <- NULL
         } else if(length(parameter) > 1) {
           if(is.null(classifierParams$predictParams@tuneParams)) classifierParams$predictParams@tuneParams <- extraParams[["predict"]][paramIndex]
           else classifierParams$predictParams@tuneParams[parameterName] <- parameter # Multiple values, so tune them.
