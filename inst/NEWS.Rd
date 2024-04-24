@@ -2,6 +2,11 @@
 \title{ClassifyR News}
 \encoding{UTF-8}
 
+\section{Version 3.8.0}{\itemize{
+  \item
+  Extraction of seed for random number generator fixed.
+}}
+
 \section{Version 3.6.0}{\itemize{
   \item
   Balancing of non-censored event times across folds.
