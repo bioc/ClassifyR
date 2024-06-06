@@ -23,16 +23,19 @@
 #' printed, or if none are stored, the performance metric will be calculated automatically.
 #' @param characteristicsList A named list of characteristics. Each element's
 #' name must be one of \code{"x"}, \code{"row"}, \code{"column"},
-#' \code{"fillColour"}, or \code{"fillLine"}. The value of each element must be a
+#' \code{"fillColour"}, or \code{"lineColour"}. The value of each element must be a
 #' characteristic name, as stored in the \code{"characteristic"} column of the
 #' results' characteristics table. Only \code{"x"} is mandatory. It is
 #' \code{"auto"} by default, which will identify a characteristic that has a unique
-#' value for each element of \code{results}.
+#' value for each element of \code{results}. \code{"x"} represents a characteristic which will
+#' form the x-axis of the plot. \code{"row"} and  \code{"column"} each specify one characteristic
+#' which will form the row facet and the column facet, respectively, of a facetted plot.
 #' @param coloursList A named list of plot aspects and colours for the aspects.
 #' No elements are mandatory. If specified, each list element's name must be
 #' either \code{"fillColours"} or \code{"lineColours"}. If a characteristic is
 #' associated to fill or line by \code{characteristicsList} but this list is
 #' empty, a palette of colours will be automatically chosen.
+#' @param alpha Default: 1. A number between 0 and 1 specifying the transparency level of any fill.
 #' @param orderingList An optional named list. Any of the variables specified
 #' to \code{characteristicsList} can be the name of an element of this list and
 #' the value of the element is the order in which the factors should be
@@ -104,7 +107,7 @@ setMethod("performancePlot", "ClassifyResult", function(results, ...) {
 #' @export
 setMethod("performancePlot", "list",
           function(results, metric = "auto",
-                   characteristicsList = list(x = "auto"), aggregate = character(), coloursList = list(), orderingList = list(),
+                   characteristicsList = list(x = "auto"), aggregate = character(), coloursList = list(), alpha = 1, orderingList = list(),
                    densityStyle = c("box", "violin"), yLimits = NULL, fontSizes = c(24, 16, 12, 12), title = NULL,
                    margin = grid::unit(c(1, 1, 1, 1), "lines"), rotate90 = FALSE, showLegend = TRUE)
 {
@@ -168,7 +171,7 @@ setMethod("performancePlot", "list",
   if("fillColour" %in% names(characteristicsList))
     if(!"fillColours" %in% names(coloursList)) coloursList[["fillColours"]] <- scales::hue_pal()(length(unique(plotData[, characteristicsList[["fillColour"]]])))
   if("lineColour" %in% names(characteristicsList))
-    if(!"lineColours" %in% names(coloursList)) coloursList[["lineColours"]] <- scales::hue_pal(direction = -1)(length(unique(plotData[, characteristicsList[["lineColour"]]])))
+    if(!"lineColours" %in% names(coloursList)) coloursList[["lineColours"]] <- scales::hue_pal()(length(unique(plotData[, characteristicsList[["lineColour"]]])))
   if(is.null(characteristicsList[["fillColour"]])) fillVariable <- NULL else fillVariable <- rlang::sym(characteristicsList[["fillColour"]])
   if(is.null(characteristicsList[["lineColour"]])) lineVariable <- NULL else lineVariable <- rlang::sym(characteristicsList[["lineColour"]])
   if(is.null(characteristicsList[["row"]])) rowVariable <- NULL else rowVariable <- rlang::sym(characteristicsList[["row"]])
@@ -194,12 +197,12 @@ setMethod("performancePlot", "list",
   if(any(analysisGroupSizes > 1))
   {
     multiPlotData <- do.call(rbind, analysisGrouped[analysisGroupSizes > 1])
-    performancePlot <- performancePlot + densityStyle(data = multiPlotData, ggplot2::aes(x = !!characteristicsList[['x']], y = !!(rlang::sym(metric)), fill = !!fillVariable, colour = !!lineVariable))
+    performancePlot <- performancePlot + densityStyle(data = multiPlotData, ggplot2::aes(x = !!characteristicsList[['x']], y = !!(rlang::sym(metric)), fill = !!fillVariable, colour = !!lineVariable), alpha = alpha)
   }
   if(any(analysisGroupSizes == 1))
   {
     singlePlotData <- do.call(rbind, analysisGrouped[analysisGroupSizes == 1])
-    performancePlot <- performancePlot + ggplot2::geom_bar(data = singlePlotData, stat = "identity", ggplot2::aes(x = !!characteristicsList[['x']], y = !!(rlang::sym(metric)), fill = !!fillVariable, colour = !!lineVariable))
+    performancePlot <- performancePlot + ggplot2::geom_bar(data = singlePlotData, stat = "identity", ggplot2::aes(x = !!characteristicsList[['x']], y = !!(rlang::sym(metric)), fill = !!fillVariable, colour = !!lineVariable), alpha = alpha)
   }
   
   if(!is.null(yLimits)) yLimits = c(0, 1)

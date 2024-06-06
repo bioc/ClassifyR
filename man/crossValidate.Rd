@@ -47,7 +47,8 @@
   nRepeats = 20,
   nCores = 1,
   characteristicsLabel = NULL,
-  extraParams = NULL
+  extraParams = NULL,
+  verbose = 0
 )
 
 \S4method{crossValidate}{data.frame}(
@@ -64,7 +65,8 @@
   nRepeats = 20,
   nCores = 1,
   characteristicsLabel = NULL,
-  extraParams = NULL
+  extraParams = NULL,
+  verbose = 0
 )
 
 \S4method{crossValidate}{matrix}(
@@ -81,7 +83,8 @@
   nRepeats = 20,
   nCores = 1,
   characteristicsLabel = NULL,
-  extraParams = NULL
+  extraParams = NULL,
+  verbose = 0
 )
 
 \method{train}{matrix}(x, outcomeTrain, ...)

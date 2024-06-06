@@ -14,6 +14,7 @@
   referenceLevel = NULL,
   characteristicsList = list(x = "auto"),
   coloursList = list(),
+  alpha = 1,
   orderingList = list(),
   binsList = list(),
   yMax = 100,
@@ -55,13 +56,17 @@ name must be one of \code{"x"}, \code{"row"}, \code{"column"},
 characteristic name, as stored in the \code{"characteristic"} column of the
 results' characteristics table. Only \code{"x"} is mandatory. It is
 \code{"auto"} by default, which will identify a characteristic that has a unique
-value for each element of \code{results}.}
+value for each element of \code{results}. \code{"x"} represents a characteristic which will
+form the x-axis of the plot. \code{"row"} and  \code{"column"} each specify one characteristic
+which will form the row facet and the column facet, respectively, of a facetted plot.}
 
 \item{coloursList}{A named list of plot aspects and colours for the aspects.
 No elements are mandatory. If specified, each list element's name must be
 either \code{"fillColours"} or \code{"lineColours"}. If a characteristic is
 associated to fill or line by \code{characteristicsList} but this list is
 empty, a palette of colours will be automatically chosen.}
+
+\item{alpha}{Default: 1. A number between 0 and 1 specifying the transparency level of any fill.}
 
 \item{orderingList}{An optional named list. Any of the variables specified
 to \code{characteristicsList} can be the name of an element of this list and
