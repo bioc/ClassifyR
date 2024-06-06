@@ -52,12 +52,15 @@
 #' characteristic name, as stored in the \code{"characteristic"} column of the
 #' results' characteristics table. Only \code{"x"} is mandatory. It is
 #' \code{"auto"} by default, which will identify a characteristic that has a unique
-#' value for each element of \code{results}.
+#' value for each element of \code{results}. \code{"x"} represents a characteristic which will
+#' form the x-axis of the plot. \code{"row"} and  \code{"column"} each specify one characteristic
+#' which will form the row facet and the column facet, respectively, of a facetted plot.
 #' @param coloursList A named list of plot aspects and colours for the aspects.
 #' No elements are mandatory. If specified, each list element's name must be
 #' either \code{"fillColours"} or \code{"lineColours"}. If a characteristic is
 #' associated to fill or line by \code{characteristicsList} but this list is
 #' empty, a palette of colours will be automatically chosen.
+#' @param alpha Default: 1. A number between 0 and 1 specifying the transparency level of any fill.
 #' @param orderingList An optional named list. Any of the variables specified
 #' to \code{characteristicsList} can be the name of an element of this list and
 #' the value of the element is the order in which the factors should be
@@ -147,7 +150,7 @@ setMethod("selectionPlot", "ClassifyResult", function(results, ...) {
 setMethod("selectionPlot", "list", 
           function(results,
                    comparison = "within", referenceLevel = NULL,
-                   characteristicsList = list(x = "auto"), coloursList = list(), orderingList = list(), binsList = list(),
+                   characteristicsList = list(x = "auto"), coloursList = list(), alpha = 1, orderingList = list(), binsList = list(),
                    yMax = 100, densityStyle = c("box", "violin"), fontSizes = c(24, 16, 12, 16), title = if(comparison == "within") "Feature Selection Stability" else if(comparison == "size") "Feature Selection Size" else if(comparison == "importance") "Variable Importance" else "Feature Selection Commonality",
                    yLabel = if(is.null(referenceLevel) && !comparison %in% c("size", "importance")) "Common Features (%)" else if(comparison == "size") "Set Size" else if(comparison == "importance") tail(names(results[[1]]@importance), 1) else paste("Common Features with", referenceLevel, "(%)"),
                    margin = grid::unit(c(1, 1, 1, 1), "lines"), rotate90 = FALSE, showLegend = TRUE, parallelParams = bpparam())
@@ -350,7 +353,7 @@ setMethod("selectionPlot", "list",
     }
   }
   if(!"lineColours" %in% names(coloursList) && "lineColour" %in% names(characteristicsList))
-    coloursList[["lineColours"]] <- scales::hue_pal(direction = -1)(length(unique(plotData[, characteristicsList[["lineColour"]]])))
+    coloursList[["lineColours"]] <- scales::hue_pal()(length(unique(plotData[, characteristicsList[["lineColour"]]])))
   
   if(comparison == "importance")
   {
@@ -368,7 +371,7 @@ setMethod("selectionPlot", "list",
   {
     characteristicsList <- lapply(characteristicsList, rlang::sym)
     legendPosition <- ifelse(showLegend == TRUE, "right", "none")
-    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = !!characteristicsList[['x']], y = overlap, fill = !!fillVariable, colour = !!lineVariable)) +
+    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = !!characteristicsList[['x']], y = overlap, fill = !!fillVariable, colour = !!lineVariable), alpha = alpha) +
                             ggplot2::coord_cartesian(ylim = c(0, yMax)) + ggplot2::xlab(xLabel) + ggplot2::ylab(yLabel) +
                             ggplot2::ggtitle(title) + ggplot2::theme(legend.position = legendPosition, axis.title = ggplot2::element_text(size = fontSizes[2]), axis.text = ggplot2::element_text(colour = "black", size = fontSizes[3]), plot.title = ggplot2::element_text(size = fontSizes[1], hjust = 0.5), plot.margin = margin)
     if(max(table(xData)) == 1) selectionPlot <- selectionPlot + ggplot2::geom_bar(stat = "identity") else selectionPlot <- selectionPlot + densityStyle()
@@ -424,12 +427,12 @@ setMethod("selectionPlot", "list",
     featureCounts <- table(plotData[, "feature"])
     keepFeatures <- featureCounts[featureCounts >= 2]
     plotData <- plotData[plotData[, "feature"] %in% keepFeatures, ]
-    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = feature, y = !!changeName, fill = !!fillVariable, colour = !!colourVariable)) +
+    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = feature, y = !!changeName, fill = !!fillVariable, colour = !!colourVariable), alpha = alpha) +
       ggplot2::xlab(xLabel) + ggplot2::ylab(yLabel) +
       ggplot2::ggtitle(title) + ggplot2::theme(legend.position = legendPosition, axis.title = ggplot2::element_text(size = fontSizes[2]), axis.text = ggplot2::element_text(colour = "black", size = fontSizes[3]), axis.text.x = ggplot2::element_text(angle = 45, hjust = 1), plot.title = ggplot2::element_text(size = fontSizes[1], hjust = 0.5), plot.margin = margin) + densityStyle()
     }
   } else {
-    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = !!rlang::sym(characteristicsList[['x']]), y = size)) +
+    selectionPlot <- ggplot2::ggplot(plotData, ggplot2::aes(x = !!rlang::sym(characteristicsList[['x']]), y = size), alpha = alpha) +
                      ggplot2::geom_tile(ggplot2::aes(fill = Freq)) + ggplot2::ggtitle(title) + ggplot2::labs(x = xLabel, y = yLabel) + ggplot2::scale_x_discrete(expand = c(0, 0)) + ggplot2::scale_y_discrete(expand = c(0, 0)) + ggplot2::theme(axis.title = ggplot2::element_text(size = fontSizes[2]), axis.text = ggplot2::element_text(colour = "black", size = fontSizes[3]), plot.title = ggplot2::element_text(size = fontSizes[1], hjust = 0.5)) + ggplot2::guides(fill = ggplot2::guide_legend(title = "Frequency (%)"))
   }
   

@@ -14,6 +14,7 @@
   characteristicsList = list(x = "auto"),
   aggregate = character(),
   coloursList = list(),
+  alpha = 1,
   orderingList = list(),
   densityStyle = c("box", "violin"),
   yLimits = NULL,
@@ -38,11 +39,13 @@ printed, or if none are stored, the performance metric will be calculated automa
 
 \item{characteristicsList}{A named list of characteristics. Each element's
 name must be one of \code{"x"}, \code{"row"}, \code{"column"},
-\code{"fillColour"}, or \code{"fillLine"}. The value of each element must be a
+\code{"fillColour"}, or \code{"lineColour"}. The value of each element must be a
 characteristic name, as stored in the \code{"characteristic"} column of the
 results' characteristics table. Only \code{"x"} is mandatory. It is
 \code{"auto"} by default, which will identify a characteristic that has a unique
-value for each element of \code{results}.}
+value for each element of \code{results}. \code{"x"} represents a characteristic which will
+form the x-axis of the plot. \code{"row"} and  \code{"column"} each specify one characteristic
+which will form the row facet and the column facet, respectively, of a facetted plot.}
 
 \item{aggregate}{A character vector of the levels of
 \code{characteristicsList['x']} to aggregate to a single number by taking
@@ -54,6 +57,8 @@ No elements are mandatory. If specified, each list element's name must be
 either \code{"fillColours"} or \code{"lineColours"}. If a characteristic is
 associated to fill or line by \code{characteristicsList} but this list is
 empty, a palette of colours will be automatically chosen.}
+
+\item{alpha}{Default: 1. A number between 0 and 1 specifying the transparency level of any fill.}
 
 \item{orderingList}{An optional named list. Any of the variables specified
 to \code{characteristicsList} can be the name of an element of this list and
