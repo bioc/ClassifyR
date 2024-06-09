@@ -156,13 +156,21 @@ setMethod("calcCVperformance", "ClassifyResult",
   # Allow calculation of multiple metrics at once.
   for(performanceType in performanceTypes)
   {
-      ### Group by permutation
+      ### Group by lowest level of test set.
       if(!performanceType %in% c("Sample Error", "Sample Accuracy"))
       {
-        if("permutation" %in% colnames(result@predictions))
-          grouping <- result@predictions[, "permutation"]
-        else # A set of folds or all leave-k-out predictions or independent train and test sets.
+        if("fold" %in% colnames(result@predictions)) # k-Fold or repeated k-Fold cross-validation.
+        {
+          grouping <- result@predictions[, "fold"]
+          if("permutation" %in% colnames(result@predictions))
+            grouping <- paste(result@predictions[, "permutation"], grouping, sep = ':')
+        } else if("permutation" %in% colnames(result@predictions)) # Monte Carlo cross-validation.
+        {
+          grouping <- result@predictions[, "permutation"]      
+        } 
+        else { # Leave-k-out or independent train and test set, such as created by runTest function.
           grouping <- rep(1, nrow(result@predictions))
+        }
       }
       
       ### Performance for survival data
@@ -173,6 +181,10 @@ setMethod("calcCVperformance", "ClassifyResult",
                                         samples = samples,
                                         performanceType = performanceType, 
                                         grouping = grouping)
+        if(grepl(':', names(performance[["values"]])[1])) # Then average for each permutation.
+        {
+          performance[["values"]] <- by(performance[["values"]], sapply(strsplit(names(performance[["values"]]), ':'), '[', 1), mean)
+        }
         result@performance[[performance[["name"]]]] <- performance[["values"]]
       }
       
@@ -180,6 +192,10 @@ setMethod("calcCVperformance", "ClassifyResult",
         performance <- .calcPerformance(actualOutcome[match(result@predictions[, "sample"], sampleNames(result))],
                                         result@predictions[, levels(actualOutcome)],
                                         performanceType = performanceType, grouping = grouping)
+        if(grepl(':', names(performance[["values"]])[1])) # Then average for each permutation.
+        {
+          performance[["values"]] <- by(performance[["values"]], sapply(strsplit(names(performance[["values"]]), ':'), '[', 1), mean)
+        }
         result@performance[[performance[["name"]]]] <- performance[["values"]]
       }
       
