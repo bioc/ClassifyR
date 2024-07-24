@@ -12,9 +12,9 @@ When a choice about a model to use is made and specified to `crossValidate`, per
 
 Model | Keyword | Default Parameters | Other Parameters
 ----|:----:|:----:|:----:
-Random Forest | `"randomForest"` | `mTryProportion = c(0.25, 0.33, 0.50, 0.66, 0.75, 1.00)` and `num.trees = c(10, seq(100, 500, 100)` | See `?ranger::ranger` 
-Random Survival Forest | `"randomSurvivalForest"` | `mTryProportion = c(0.25, 0.33, 0.50, 0.66, 0.75, 1.00)` and `num.trees = c(10, seq(100, 500, 100)` | See `?randomForestSRC::rfsrc`
-Extreme Gradient Boosting | `"XGB"` | `mTryProportion = c(0.25, 0.33, 0.50, 0.66, 0.75, 1.00)` and `nrounds = c(5, 10, 15)` | See `?xgboost::xgboost`
+Random Forest | `"randomForest"` | `mTryProportion = c(0.10, 0.25, 0.33)` and `num.trees = c(10, 100)` | See `?ranger::ranger` 
+Random Survival Forest | `"randomSurvivalForest"` | `mTryProportion = c(0.10, 0.25, 0.33)` and `num.trees = c(10, 100)` | See `?randomForestSRC::rfsrc`
+Extreme Gradient Boosting | `"XGB"` | `mTryProportion = c(0.10, 0.25, 0.33)` and `nrounds = c(5, 10)` | See `?xgboost::xgboost`
 k Nearest Neighbours | `"kNN"` | `k = 1:5` | See `?class::knn`
 Support Vector Machine | `"SVM"` | `kernel = c("linear", "polynomial", "radial", "sigmoid")` and  `cost = 10^(-3:3))` | See `?e1071::svm`
 naive Bayes Kernel | `"naiveBayes"` | `difference = c("unweighted", "weighted")` | `weighting = c("height difference", "crossover distance")` and `minDifference`, a number 0 or higher.
