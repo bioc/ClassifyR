@@ -146,10 +146,9 @@ setMethod("calcCVperformance", "ClassifyResult",
   {
       if(is.factor(actualOutcome))
       {
-        if(all(levels(actualOutcome) %in% colnames(predictions(result)))) # Class scores present.
-          performanceTypes <- c("AUC", "Balanced Accuracy")
-        else # No class scores available in prections table.
-          performanceTypes <- "Balanced Accuracy"
+        performanceTypes <- "Balanced Accuracy"  
+        if(all(levels(actualOutcome) %in% colnames(predictions(result))) && "fold" %in% colnames(result@predictions) && max(result@predictions[, "fold"]) < length(result@originalNames)) # Class scores present.
+          performanceTypes <- c(performanceTypes, "AUC")
     } else performanceTypes <- "C-index"
   }
   
@@ -313,9 +312,9 @@ setMethod("calcCVperformance", "ClassifyResult",
       classSizes <- rowSums(confusionMatrix)
       classErrors <- classSizes - diag(confusionMatrix)
       if(performanceType == "Balanced Accuracy")
-        mean(diag(confusionMatrix) / classSizes)
+        mean(diag(confusionMatrix) / classSizes, na.rm = TRUE)
       else
-        mean(classErrors / classSizes)
+        mean(classErrors / classSizes, na.rm = TRUE)
     }, actualOutcome, predictedOutcome, SIMPLIFY = FALSE))
   } else if(performanceType == "AUC") {
     performanceValues <- unlist(mapply(function(iterationClasses, iterationPredictions)
