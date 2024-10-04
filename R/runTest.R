@@ -205,8 +205,16 @@ input data. Autmomatically reducing to smaller number.")
     extrasList <- list()
     extras <- .methodFormals(modellingParams@trainParams@getFeatures, class(trained[[1]]))[-1]
     if(length(extras) > 0)
-      extrasList <- mget(setdiff(names(extras), "..."))
-
+    {
+      if("classesTrain" %in% names(extras))
+      {
+         whichRename <- match("classesTrain", names(extras))
+         names(extras)[whichRename] <- "outcomeTrain"
+         extrasList <- mget(setdiff(names(extras), "..."))
+         whichRename <- match("outcomeTrain", names(extrasList))
+         names(extrasList)[whichRename] <- "classesTrain"
+      } else {extrasList <- mget(setdiff(names(extras), "..."))}
+    }
     rankedChosenList <- do.call(modellingParams@trainParams@getFeatures, c(unname(trained[1]), extrasList))
     rankedFeaturesIndices <- rankedChosenList[[1]]
     selectedFeaturesIndices <- rankedChosenList[[2]]

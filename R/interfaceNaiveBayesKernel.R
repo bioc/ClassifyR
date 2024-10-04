@@ -43,16 +43,19 @@ naiveBayesKernel <- function(measurementsTrain, classesTrain, measurementsTest,
   # Needed even if horizontal distance weighting is used to determine the predicted class.
   posteriorsVertical <- mapply(function(featureSplines, testSamples)
   {
-    sapply(1:length(levels(classesTrain)), function(classIndex)
+    vertical <- sapply(1:length(levels(classesTrain)), function(classIndex)
     {
       featureSplines[[classIndex]](testSamples)
     })
+    if(!is.matrix(vertical)) vertical <- matrix(vertical, nrow = 1)
+    vertical
   }, splines, as.data.frame(testingMatrix), SIMPLIFY = FALSE)
-    
+
   classesVertical <- sapply(posteriorsVertical, function(featureVertical)
   {
       apply(featureVertical, 1, function(sampleVertical) levels(classesTrain)[which.max(sampleVertical)])
   }) # Matrix, rows are test samples, columns are features.
+  if(!is.matrix(classesVertical)) classesVertical <- matrix(classesVertical, nrow = 1)
     
   distancesVertical <- sapply(posteriorsVertical, function(featureVertical)
   { # Vertical distance between highest density and second-highest, at a particular value.
@@ -62,6 +65,7 @@ naiveBayesKernel <- function(measurementsTrain, classesTrain, measurementsTest,
       Reduce('-', twoHighest)
     })
   }) # Matrix, rows are test samples, columns are features.
+  if(!is.matrix(distancesVertical)) distancesVertical <- matrix(distancesVertical, nrow = 1)
   
   if(difference == "weighted" && weighting == "crossover distance")
   {

@@ -283,7 +283,7 @@
     
     performances <- sapply(1:nrow(tuneCombos), function(rowIndex)
     {
-      modellingParams@trainParams@otherParams <- c(modellingParams@trainParams@otherParams, as.list(tuneCombos[rowIndex, ]))
+      modellingParams@trainParams@otherParams <- c(modellingParams@trainParams@otherParams, as.list(tuneCombos[rowIndex, , drop = FALSE]))
       if(crossValParams@tuneMode == "Resubstitution")
       {
         result <- runTest(measurementsTrain, outcomeTrain, measurementsTrain, outcomeTrain,
