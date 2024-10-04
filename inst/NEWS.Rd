@@ -2,6 +2,11 @@
 \title{ClassifyR News}
 \encoding{UTF-8}
 
+\section{Version 3.10.0}{\itemize{
+  \item
+  Metric calculation done at fold level rather than permutation level.
+}}
+
 \section{Version 3.8.0}{\itemize{
   \item
   Extraction of seed for random number generator fixed.
