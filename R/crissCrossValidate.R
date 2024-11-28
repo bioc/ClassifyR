@@ -77,7 +77,9 @@ crissCrossValidate <- function(measurements, outcomes,
       mapply(function(testData, testOutcomes)
       {
         predictions <- predict(trainedModel, testData, verbose = verbose)
-        if(is(predictions, "tabular")) predictions <- predictions[, na.omit(match(c("class", "risk"), colnames(predictions)))]
+        if(performanceType != "AUC") # Then expect a pair of parallel factor vectors.
+            predictions <- predictions[, na.omit(match(c("class", "risk"), colnames(predictions)))]
+        # Else, keep the table of class probabilities as it is.
         calcExternalPerformance(testOutcomes, predictions, performanceType)
       }, measurements, outcomes)
     })
