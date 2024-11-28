@@ -1,43 +1,54 @@
 # Creates two lists of lists. First has training samples, second has test samples for a range
 # of different cross-validation schemes.
 #' @import utils
-.samplesSplits <- function(crossValParams, outcome)
+.samplesSplits <- function(crossValParams, outcome, group)
 {
   if(crossValParams@samplesSplits %in% c("k-Fold", "Permute k-Fold"))
   {
     nPermutations <- ifelse(crossValParams@samplesSplits == "k-Fold", 1, crossValParams@permutations)
     nFolds <- crossValParams@folds
+    if(is.null(group))
+    {
     samplesFolds <- lapply(1:nPermutations, function(permutation)
     {
-      # Create maximally-balanced folds, so class balance is about the same in all.
-      allFolds <- vector(mode = "list", length = nFolds)
-      foldsIndexes <- rep(1:nFolds, length.out = length(outcome))
-      
-      foldsIndex = 1
-      # Balance the non-censored observations across folds.
-      if(is(outcome, "Surv")) outcome <- factor(outcome[, "status"])
-      for(outcomeName in levels(outcome))
+          # Create maximally-balanced folds, so class balance is about the same in all.
+          allFolds <- vector(mode = "list", length = nFolds)
+          foldsIndexes <- rep(1:nFolds, length.out = length(outcome))
+              
+          foldsIndex = 1
+          # Balance the non-censored observations across folds.
+          if(is(outcome, "Surv")) outcome <- factor(outcome[, "status"])
+          for(outcomeName in levels(outcome))
+          {
+            # Permute the indexes of samples in the class.
+            whichSamples <- sample(which(outcome == outcomeName))
+            whichFolds <- foldsIndexes[foldsIndex:(foldsIndex + length(whichSamples) - 1)]
+            
+            # Put each sample into its fold.
+            for(sampleIndex in 1:length(whichSamples))
+            {
+              allFolds[[whichFolds[sampleIndex]]] <- c(allFolds[[whichFolds[sampleIndex]]], whichSamples[sampleIndex])
+            }
+            # Move the beginning index to the first new index.
+            foldsIndex <- foldsIndex + length(whichSamples)
+          }
+          list(train = lapply(1:nFolds, function(index) unlist(allFolds[setdiff(1:nFolds, index)])),
+               test = allFolds)
+        })
+        # Reorganise into two separate lists, no more nesting.
+        list(train = unlist(lapply(samplesFolds, '[[', 1), recursive = FALSE),
+             test = unlist(lapply(samplesFolds, '[[', 2), recursive = FALSE))
+    } else {
+      group <- as.character(group) # For simplicity of comparisons.    
+      distinctGroups <- unique(as.character(group))
+      if(nFolds != length(distinctGroups))
       {
-        # Permute the indexes of samples in the class.
-        whichSamples <- sample(which(outcome == outcomeName))
-        whichFolds <- foldsIndexes[foldsIndex:(foldsIndex + length(whichSamples) - 1)]
-        
-        # Put each sample into its fold.
-        for(sampleIndex in 1:length(whichSamples))
-        {
-          allFolds[[whichFolds[sampleIndex]]] <- c(allFolds[[whichFolds[sampleIndex]]], whichSamples[sampleIndex])
-        }
-        # Move the beginning index to the first new index.
-        foldsIndex <- foldsIndex + length(whichSamples)
+        warning("Grouped samples sample-splitting but 'nFolds' not equal to number of groups. Setting it to the number of groups.")
+        nFolds <- length(distinctGroups)
       }
-      
-      list(train = lapply(1:nFolds, function(index) unlist(allFolds[setdiff(1:nFolds, index)])),
-           test = allFolds
-           )
-    })
-    # Reorganise into two separate lists, no more nesting.
-    list(train = unlist(lapply(samplesFolds, '[[', 1), recursive = FALSE),
-         test = unlist(lapply(samplesFolds, '[[', 2), recursive = FALSE))
+      list(train = lapply(1:nFolds, function(index) which(group != distinctGroups[index])),
+           test = lapply(1:nFolds, function(index) which(group == distinctGroups[index])))
+    }
   } else if(crossValParams@samplesSplits == "Permute Percentage Split") {
     # Take the same percentage of samples from each class to be in training set.
     percent <- crossValParams@percentTest

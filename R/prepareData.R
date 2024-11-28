@@ -15,6 +15,7 @@
 #' a character string, or vector of such strings, containing column name(s) of column(s)
 #' containing either classes or time and event information about survival. If column names
 #' of survival information, time must be in first column and event status in the second.
+#' @param group Not user-specified. Only passed by \code{runTests} for subsetting.
 #' @param outcomeColumns If \code{measurements} is a \code{MultiAssayExperiment}, the
 #' names of the column (class) or columns (survival) in the table extracted by \code{colData(data)}
 #' that contain(s) the each individual's outcome to use for prediction.
@@ -58,7 +59,7 @@ setMethod("prepareData", "data.frame",
 #' @rdname prepareData
 #' @export
 setMethod("prepareData", "DataFrame",
-  function(measurements, outcome, useFeatures = NULL, maxMissingProp = 0.0, topNvariance = NULL)
+  function(measurements, outcome, group = NULL, useFeatures = NULL, maxMissingProp = 0.0, topNvariance = NULL)
 {
   if(is.null(rownames(measurements)))
   {
@@ -183,6 +184,7 @@ setMethod("prepareData", "DataFrame",
   {
     measurements <- measurements[-dropSamples, ]
     outcome <- outcome[-dropSamples]  
+    if(!is.null(group)) group <- group[-dropSamples]
   }
   
   # Remove features or samples to ensure all features have less missingness than allowed.
@@ -220,6 +222,7 @@ setMethod("prepareData", "DataFrame",
     dropIndices <- match(dropSamples, rownames(measurements))      
     measurements <- measurements[-dropIndices, ]
     outcome <- outcome[-dropIndices]
+    if(!is.null(group)) group <- group[-dropIndices]
   }
   
   # Use only the most N variable features per assay.
@@ -240,15 +243,18 @@ setMethod("prepareData", "DataFrame",
   
   # Names are on both the covariates and outcome. Ensure consistent ordering.
   if(!is.null(rownames(measurements)) && !is.null(names(outcome)))
+  {
       measurements <- measurements[match(names(outcome), rownames(measurements)), ]
+      group <- group[match(names(outcome), names(group))]
+  }
   
-  list(measurements = measurements, outcome = outcome)
+  list(measurements = measurements, outcome = outcome, group = group)
 })
 
 #' @rdname prepareData
 #' @export
 setMethod("prepareData", "MultiAssayExperiment",
-  function(measurements, outcomeColumns = NULL, useFeatures = NULL, ...)
+  function(measurements, outcomeColumns = NULL, group = NULL, useFeatures = NULL, ...)
 {
   if(is.null(useFeatures) || !"clinical" %in% names(useFeatures))
   {
@@ -268,7 +274,12 @@ setMethod("prepareData", "MultiAssayExperiment",
   # Get all desired measurements tables and clinical columns.
   # These form the independent variables to be used for making predictions with.
   # Variable names will have names like RNA_BRAF for traceability.
-  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures, outcomeColumns))
+  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures, group, outcomeColumns))
+  if(!is.null(group))
+  {
+    group <- dataTable[, "group"]
+    dataTable <- dataTable[, -match("group", colnames(dataTable))]
+  }
   rownames(dataTable) <- dataTable[, "primary"]
   S4Vectors::mcols(dataTable)[, "sourceName"] <- gsub("colDataCols", "clinical", S4Vectors::mcols(dataTable)[, "sourceName"])
   dataTable <- dataTable[, -match("primary", colnames(dataTable))]
@@ -284,7 +295,7 @@ setMethod("prepareData", "MultiAssayExperiment",
   S4Vectors::mcols(dataTable) <- S4Vectors::mcols(dataTable)[, c("assay", "feature")]
     
   # Do other filtering and preparation in DataFrame function.
-  prepareData(dataTable, outcomeColumns, useFeatures = NULL, ...)
+  prepareData(dataTable, outcomeColumns, group = group, useFeatures = NULL, ...)
 })
 
 #' @rdname prepareData

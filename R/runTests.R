@@ -18,6 +18,11 @@
 #' columns (survival) in the table extracted by \code{colData(data)} that contain(s) the samples'
 #' outcome to use for prediction. If column names of survival information, time must be in first
 #' column and event status in the second.
+#' @param group Default: \code{NULL}. A vector specifying the group each sample belongs to, in case
+#' assigning all samples belonging to a particular group to a particular fold is desired. If
+#' \code{measurements} is a \code{MultiAssayExperiment}, the name of the column in the table extracted by
+#' \code{colData(data)} that contains the groupings.
+#' outcome
 #' @param crossValParams An object of class \code{\link{CrossValParams}},
 #' specifying the kind of cross-validation to be done.
 #' @param modellingParams An object of class \code{\link{ModellingParams}},
@@ -69,7 +74,7 @@ setMethod("runTests", c("matrix"), function(measurements, outcome, ...) # Matrix
 #' @rdname runTests
 #' @import BiocParallel
 #' @export
-setMethod("runTests", "DataFrame", function(measurements, outcome, crossValParams = CrossValParams(), modellingParams = ModellingParams(),
+setMethod("runTests", "DataFrame", function(measurements, outcome, group = NULL, crossValParams = CrossValParams(), modellingParams = ModellingParams(),
            characteristics = S4Vectors::DataFrame(), ..., verbose = 1)
 {
   if(is.null(rownames(measurements)))
@@ -84,10 +89,11 @@ setMethod("runTests", "DataFrame", function(measurements, outcome, crossValParam
   originalFeatures <- colnames(measurements)
   if("assay" %in% colnames(S4Vectors::mcols(measurements)))
       originalFeatures <- S4Vectors::mcols(measurements)[, c("assay", "feature")]                 
-  splitDataset <- prepareData(measurements, outcome, ...)
+  splitDataset <- prepareData(measurements, outcome, group, ...)
   measurements <- splitDataset[["measurements"]]
   outcome <- splitDataset[["outcome"]]
-  
+  group <- splitDataset[["group"]]
+
   if(!is.null(modellingParams@selectParams) && max(modellingParams@selectParams@tuneParams[["nFeatures"]]) > ncol(measurements))
   {
       warning("Attempting to evaluate more features for feature selection than in
@@ -99,7 +105,7 @@ input data. Autmomatically reducing to smaller number.")
   resultTypes <- c("ranked", "selected", "models", "testSet", "predictions", "tune", "importance")
 
   # Create all partitions of training and testing sets.
-  samplesSplits <- .samplesSplits(crossValParams, outcome)
+  samplesSplits <- .samplesSplits(crossValParams, outcome, group)
   splitsTestInfo <- .splitsTestInfo(crossValParams, samplesSplits)
   
   # Necessary hack for parallel processing on Windows.
@@ -194,7 +200,7 @@ input data. Autmomatically reducing to smaller number.")
 #' @import MultiAssayExperiment methods
 #' @export
 setMethod("runTests", c("MultiAssayExperiment"),
-          function(measurements, outcome, ...)
+          function(measurements, outcome, group = NULL, ...)
 {
   prepArgs <- list(measurements, outcome)              
   extraInputs <- list(...)
@@ -204,8 +210,9 @@ setMethod("runTests", c("MultiAssayExperiment"),
   if(length(prepExtras) > 0)
     prepArgs <- append(prepArgs, extraInputs[prepExtras])
   measurementsAndOutcome <- do.call(prepareData, prepArgs)
-  
-  runTestsArgs <- list(measurementsAndOutcome[["measurements"]], measurementsAndOutcome[["outcome"]])
+
+  runTestsArgs <- list(measurementsAndOutcome[["measurements"]], measurementsAndOutcome[["outcome"]],
+                       measurementsAndOutcome[["group"]])
   if(length(extraInputs) > 0 && (length(prepExtras) == 0 || length(extraInputs[-prepExtras]) > 0))
   {
     if(length(prepExtras) == 0) runTestsArgs <- append(runTestsArgs, extraInputs) else
