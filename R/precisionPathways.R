@@ -152,6 +152,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
 
 # A nice print method to avoid flooding the screen with lots of tables
 # when result is shown in console.
+#' @export
 print.PrecisionPathways <- function(x)
 {
   cat("An object of class 'PrecisionPathways'.\n")

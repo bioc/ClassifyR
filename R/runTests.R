@@ -99,8 +99,8 @@ input data. Autmomatically reducing to smaller number.")
   resultTypes <- c("ranked", "selected", "models", "testSet", "predictions", "tune", "importance")
 
   # Create all partitions of training and testing sets.
-  samplesSplits <- .samplesSplits(crossValParams, outcome)
-  splitsTestInfo <- .splitsTestInfo(crossValParams, samplesSplits)
+  samplesSplitsList <- samplesSplits(crossValParams@samplesSplits, crossValParams@permutations, crossValParams@folds, crossValParams@percentTest, crossValParams@leave, outcome)
+  splitsTestInfoTable <- splitsTestInfo(crossValParams@samplesSplits, crossValParams@permutations, crossValParams@folds, crossValParams@percentTest, crossValParams@leave, samplesSplitsList)
   
   # Necessary hack for parallel processing on Windows.
   modellingParams <- modellingParams
@@ -121,7 +121,7 @@ input data. Autmomatically reducing to smaller number.")
             measurements[testSamples, , drop = FALSE], outcome[testSamples],
             crossValParams, modellingParams, characteristics, verbose,
             .iteration = setNumber)
-  }, samplesSplits[["train"]], samplesSplits[["test"]], (1:length(samplesSplits[["train"]])),
+  }, samplesSplitsList[["train"]], samplesSplitsList[["test"]], (1:length(samplesSplitsList[["train"]])),
   #BPPARAM = crossValParams@parallelParams, SIMPLIFY = FALSE)
   SIMPLIFY = FALSE)
 
@@ -137,10 +137,10 @@ input data. Autmomatically reducing to smaller number.")
   {
     warning(paste(sum(resultErrors),  "cross-validations, but not all, had an error and have been removed from the results."))
     results <- results[!resultErrors]
-    iterationID <- do.call(paste, as.data.frame(splitsTestInfo))
+    iterationID <- do.call(paste, as.data.frame(splitsTestInfoTable))
     iterationIDlevels <- unique(iterationID)
     errorRows <- iterationID %in% iterationIDlevels[which(resultErrors)]
-    splitsTestInfo <- splitsTestInfo[!errorRows, ]
+    splitsTestInfoTable <- splitsTestInfoTable[!errorRows, ]
   }
   
   validationText <- .validationText(crossValParams)
@@ -165,10 +165,10 @@ input data. Autmomatically reducing to smaller number.")
         predictsColumnName <- "risk"
     else # Classification task. A factor.
         predictsColumnName <- "class"
-    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfo, unlist(lapply(results, "[[", "predictions")), check.names = FALSE)
+    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfoTable, unlist(lapply(results, "[[", "predictions")), check.names = FALSE)
     colnames(predictionsTable)[ncol(predictionsTable)] <- predictsColumnName
   } else { # data frame
-    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfo, do.call(rbind, lapply(results, "[[", "predictions")), check.names = FALSE)
+    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfoTable, do.call(rbind, lapply(results, "[[", "predictions")), check.names = FALSE)
   }
   rownames(predictionsTable) <- NULL
   tuneList <- lapply(results, "[[", "tune")
