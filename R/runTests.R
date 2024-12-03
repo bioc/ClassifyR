@@ -1,5 +1,11 @@
 #' Reproducibly Run Various Kinds of Cross-Validation
-#' 
+library(ClassifyR)
+variationData <- reducedDim(SCE, "PCA")
+classes2 <- rep("Control", length.out = nrow(variationData))
+classes2[dataset[, "Cell type"] != "Control"] <- "Parkinsons"
+classes2 <- factor(classes2)
+healthyParkinsonsResult <- crossValidate(variationData, classes2, selectionMethod = "none", classifier = c("kNN", "SVM", "randomForest"), nRepeats = 100, nFolds = 5, characteristicsLabel = "Healthy vs. Disease", nCores = 20)
+healthyParkinsonsResult <- lapply(healthyParkinsonsResult, calcCVperformance)#' 
 #' Enables doing classification schemes such as ordinary 10-fold, 100
 #' permutations 5-fold, and leave one out cross-validation. Processing in
 #' parallel is possible by leveraging the package \code{\link{BiocParallel}}.
@@ -115,8 +121,7 @@ input data. Autmomatically reducing to smaller number.")
   verbose <- verbose
   # Make them all local variables, so they are passed to workers.
 
-  #results <- bpmapply(function(trainingSamples, testSamples, setNumber)
-  results <- mapply(function(trainingSamples, testSamples, setNumber)
+  results <- bpmapply(function(trainingSamples, testSamples, setNumber)
   {
     if(verbose >= 1 && setNumber %% 10 == 0)
       message("Processing sample set ", setNumber, '.')
@@ -128,8 +133,7 @@ input data. Autmomatically reducing to smaller number.")
             crossValParams, modellingParams, characteristics, verbose,
             .iteration = setNumber)
   }, samplesSplits[["train"]], samplesSplits[["test"]], (1:length(samplesSplits[["train"]])),
-  #BPPARAM = crossValParams@parallelParams, SIMPLIFY = FALSE)
-  SIMPLIFY = FALSE)
+  BPPARAM = crossValParams@parallelParams, SIMPLIFY = FALSE)
 
   # Error checking and reporting.
   resultErrors <- sapply(results, function(result) is.character(result))
