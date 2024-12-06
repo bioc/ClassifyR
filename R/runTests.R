@@ -112,7 +112,7 @@ input data. Autmomatically reducing to smaller number.")
   results <- bpmapply(function(trainingSamples, testSamples, setNumber)
   {
     if(verbose >= 1 && setNumber %% 10 == 0)
-      message("Processing sample set ", setNumber, '.')
+      message(Sys.time(), ": Processing sample set ", setNumber, '.')
     
     # crossValParams is needed at least for nested feature tuning.
     
@@ -127,7 +127,7 @@ input data. Autmomatically reducing to smaller number.")
   resultErrors <- sapply(results, function(result) is.character(result))
   if(sum(resultErrors) == length(results))
   {
-      message("Error: All cross-validations had an error.")
+      message(Sys.time(), " - Error: All cross-validations had an error.")
       if(length(unique(unlist(results))) == 1)
         stop("The common problem is: ", unlist(results)[[1]])
       return(results)

@@ -37,6 +37,7 @@
 #' @param classifier Default: \code{"auto"}. A character vector of classification methods to compare. If a named character vector with names corresponding to different assays, 
 #' and performing multiview classification, the respective classification methods will be used on each assay. If \code{"auto"}, then a random forest is used for a classification
 #' task or Cox proportional hazards model for a survival task.
+#' @param autoTune Default: \code{FALSE}. A logical value of length 1 indicating whether to perform parameter tuning on a prespecified range of values. See presets.html for the classifiers and their corresponding range of values.
 #' @param multiViewMethod Default: \code{"none"}. A character vector specifying the multiview method or data integration approach to use. See \code{available("multiViewMethod") for possibilities.}
 #' @param assayCombinations A character vector or list of character vectors proposing the assays or, in the case of a list, combination of assays to use
 #' with each element being a vector of assays to combine. Special value \code{"all"} means all possible subsets of assays.
@@ -106,6 +107,7 @@ setMethod("crossValidate", "DataFrame",
                    selectionOptimisation = "Resubstitution",
                    performanceType = "auto",
                    classifier = "auto",
+                   autoTune = FALSE,
                    multiViewMethod = "none",
                    assayCombinations = "all",
                    nFolds = 5,
@@ -174,6 +176,8 @@ setMethod("crossValidate", "DataFrame",
                               sapply(selectionMethod[[assayIndex]], function(selectionForAssay) {
                                   # Loop over selectors
                                   measurementsUse <- measurements
+                                  if(verbose > 0)
+                                    message(Sys.time(), ": Running selection ", selectionForAssay, ", classifier ", classifierForAssay, '.')
                                   if(assayIndex != 1) measurementsUse <- measurements[, S4Vectors::mcols(measurements)[, "assay"] == assayIndex, drop = FALSE]
                                   CV(
                                       measurements = measurementsUse, outcome = outcome,
@@ -182,6 +186,7 @@ setMethod("crossValidate", "DataFrame",
                                       selectionMethod = selectionForAssay,
                                       selectionOptimisation = selectionOptimisation,
                                       performanceType = performanceType,
+                                      autoTune = autoTune,
                                       classifier = classifierForAssay,
                                       multiViewMethod = multiViewMethod,
                                       nFolds = nFolds,
@@ -218,7 +223,8 @@ setMethod("crossValidate", "DataFrame",
                          nFeatures = nFeatures[assayIndex],
                          selectionMethod = selectionMethod[assayIndex],
                          selectionOptimisation = selectionOptimisation,
-                         performanceType = performanceType, 
+                         performanceType = performanceType,
+                         autoTune = autoTune,
                          classifier = classifier[assayIndex],
                          multiViewMethod = ifelse(length(assayIndex) == 1, "none", multiViewMethod),
                          nFolds = nFolds,
@@ -253,6 +259,7 @@ setMethod("crossValidate", "DataFrame",
                          selectionMethod = selectionMethod[assayIndex],
                          selectionOptimisation = selectionOptimisation,
                          performanceType = performanceType,
+                         autoTune = autoTune,
                          classifier = classifier[assayIndex],
                          multiViewMethod = ifelse(length(assayIndex) == 1, "none", multiViewMethod),
                          nFolds = nFolds,
@@ -288,6 +295,7 @@ setMethod("crossValidate", "DataFrame",
                          selectionMethod = selectionMethod[assayIndex],
                          selectionOptimisation = selectionOptimisation,
                          performanceType = performanceType,
+                         autoTune = autoTune,
                          classifier = classifier[assayIndex],
                          multiViewMethod = ifelse(length(assayIndex) == 1, "none", multiViewMethod),
                          nFolds = nFolds,
@@ -315,6 +323,7 @@ setMethod("crossValidate", "MultiAssayExperimentOrList",
                    selectionOptimisation = "Resubstitution",
                    performanceType = "auto",
                    classifier = "auto",
+                   autoTune = FALSE,
                    multiViewMethod = "none",
                    assayCombinations = "all",
                    nFolds = 5,
@@ -334,6 +343,7 @@ setMethod("crossValidate", "MultiAssayExperimentOrList",
                             selectionMethod = selectionMethod,
                             selectionOptimisation = selectionOptimisation,
                             performanceType = performanceType,
+                            autoTune = autoTune,
                             classifier = classifier,
                             multiViewMethod = multiViewMethod,
                             assayCombinations = assayCombinations,
@@ -341,7 +351,8 @@ setMethod("crossValidate", "MultiAssayExperimentOrList",
                             nRepeats = nRepeats,
                             nCores = nCores,
                             characteristicsLabel = characteristicsLabel,
-                            extraParams = extraParams)
+                            extraParams = extraParams,
+                            verbose = verbose)
           })
 
 #' @rdname crossValidate
@@ -354,6 +365,7 @@ setMethod("crossValidate", "data.frame", # data.frame of numeric measurements.
                    selectionOptimisation = "Resubstitution",
                    performanceType = "auto",
                    classifier = "auto",
+                   autoTune = FALSE,
                    multiViewMethod = "none",
                    assayCombinations = "all",
                    nFolds = 5,
@@ -368,13 +380,14 @@ setMethod("crossValidate", "data.frame", # data.frame of numeric measurements.
                             selectionMethod = selectionMethod,
                             selectionOptimisation = selectionOptimisation,
                             performanceType = performanceType,
+                            autoTune = autoTune,
                             classifier = classifier,
                             multiViewMethod = multiViewMethod,
                             assayCombinations = assayCombinations,
                             nFolds = nFolds,
                             nRepeats = nRepeats,
                             nCores = nCores,
-                            characteristicsLabel = characteristicsLabel, extraParams = extraParams)
+                            characteristicsLabel = characteristicsLabel, extraParams = extraParams, verbose = verbose)
           })
 
 #' @rdname crossValidate
@@ -387,6 +400,7 @@ setMethod("crossValidate", "matrix", # Matrix of numeric measurements.
                    selectionOptimisation = "Resubstitution",
                    performanceType = "auto",
                    classifier = "auto",
+                   autoTune = FALSE,
                    multiViewMethod = "none",
                    assayCombinations = "all",
                    nFolds = 5,
@@ -401,13 +415,14 @@ setMethod("crossValidate", "matrix", # Matrix of numeric measurements.
                             selectionMethod = selectionMethod,
                             selectionOptimisation = selectionOptimisation,
                             performanceType = performanceType,
+                            autoTune = autoTune,
                             classifier = classifier,
                             multiViewMethod = multiViewMethod,
                             assayCombinations = assayCombinations,
                             nFolds = nFolds,
                             nRepeats = nRepeats,
                             nCores = nCores,
-                            characteristicsLabel = characteristicsLabel, extraParams = extraParams)
+                            characteristicsLabel = characteristicsLabel, extraParams = extraParams, verbose = verbose)
           })
 
 ######################################
@@ -505,6 +520,7 @@ generateModellingParams <- function(assayIDs,
                                     selectionOptimisation,
                                     performanceType = "auto",
                                     classifier,
+                                    autoTune,
                                     multiViewMethod = "none",
                                     extraParams
 ){
@@ -515,6 +531,7 @@ generateModellingParams <- function(assayIDs,
                                           selectionMethod,
                                           selectionOptimisation,
                                           performanceType,
+                                          autoTune,
                                           classifier,
                                           multiViewMethod, extraParams)
         return(params)
@@ -568,6 +585,8 @@ generateModellingParams <- function(assayIDs,
           if(!is.na(inTune)) classifierParams$trainParams@tuneParams <- classifierParams$trainParams@tuneParams[-inTune]
         } 
       }
+      if(length(classifierParams$trainParams@tuneParams) == 1 && names(classifierParams$trainParams@tuneParams) == "performanceType")
+        classifierParams$trainParams@tuneParams <- NULL    
     }
     if(!is.null(extraParams) && "predict" %in% names(extraParams))
     {
@@ -649,6 +668,7 @@ generateMultiviewParams <- function(assayIDs,
                                     selectionMethod,
                                     selectionOptimisation,
                                     performanceType,
+                                    autoTune,
                                     classifier,
                                     multiViewMethod, extraParams){
 
@@ -668,6 +688,7 @@ generateMultiviewParams <- function(assayIDs,
                                  MoreArgs = list(
                                      selectionOptimisation = selectionOptimisation,
                                      performanceType = performanceType,
+                                     autoTune = autoTune,
                                      classifier = classifier,
                                      multiViewMethod = "none",
                                      extraParams = extraParams),
@@ -681,6 +702,7 @@ generateMultiviewParams <- function(assayIDs,
                                           selectionMethod = selectionMethod[[1]],
                                           selectionOptimisation = "none",
                                           performanceType = performanceType,
+                                          autoTune = autoTune,
                                           classifier = classifier[[1]],
                                           multiViewMethod = "none",
                                           extraParams = extraParams)
@@ -708,6 +730,7 @@ generateMultiviewParams <- function(assayIDs,
                                  assayIDs = assayIDs,
                                  measurements = assayTrain[assayIDs],
                                  classifier = classifier[assayIDs],
+                                 autoTune = autoTune,
                                  MoreArgs = list(
                                      selectionOptimisation = selectionOptimisation,
                                      performanceType = performanceType,
@@ -739,6 +762,7 @@ generateMultiviewParams <- function(assayIDs,
                                  assayIDs = "clinical",
                                  measurements = assayTrain[["clinical"]],
                                  classifier = classifier["clinical"],
+                                 autoTune = autoTune,
                                  selectionOptimisation = selectionOptimisation,
                                  performanceType = performanceType,
                                  multiViewMethod = "none",
@@ -766,6 +790,7 @@ CV <- function(measurements, outcome, x, outcomeTrain, measurementsTest, outcome
                selectionOptimisation,
                performanceType,
                classifier,
+               autoTune,
                multiViewMethod,
                nFolds,
                nRepeats,
@@ -791,6 +816,7 @@ CV <- function(measurements, outcome, x, outcomeTrain, measurementsTest, outcome
                                                selectionMethod = selectionMethod,
                                                selectionOptimisation = selectionOptimisation,
                                                performanceType = performanceType,
+                                               autoTune = autoTune,
                                                classifier = classifier,
                                                multiViewMethod = multiViewMethod, extraParams = extraParams)
     
@@ -841,7 +867,7 @@ train.data.frame <- function(x, outcomeTrain, ...)
 #' @param performanceType Performance metric to optimise if classifier has any tuning parameters.
 #' @method train DataFrame
 #' @export
-train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures = 20, classifier = "auto", performanceType = "auto",
+train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures = 20, classifier = "auto", autoTune = FALSE, performanceType = "auto",
                             multiViewMethod = "none", assayIDs = "all", extraParams = NULL, verbose = 0, ...)
                    {
               prepParams <- list(x, outcomeTrain)
@@ -884,7 +910,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
                                   
                                   modellingParams <- generateModellingParams(assayIDs = assayIDs, measurements = measurements, nFeatures = nFeatures,
                                                      selectionMethod = selectionMethod, selectionOptimisation = "Resubstitution", performanceType = performanceType,
-                                                     classifier = classifier, multiViewMethod = "none", extraParams = extraParams)
+                                                     classifier = classifier, autoTune = autoTune, multiViewMethod = "none", extraParams = extraParams)
 
                                   if(!is.null(modellingParams@selectParams))
                                   {

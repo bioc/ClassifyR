@@ -629,14 +629,17 @@ setClassUnion("characterOrFunction", c("character", "function"))
 #' @rdname TrainParams-class
 #' @export
 setMethod("TrainParams", c("characterOrFunction"),
-          function(classifier, balancing = c("downsample", "upsample", "none"), characteristics = DataFrame(), intermediate = character(0), tuneParams = NULL, getFeatures = NULL, ...)
+          function(classifier, autoTune = FALSE, balancing = c("downsample", "upsample", "none"), characteristics = DataFrame(), intermediate = character(0), tuneParams = NULL, getFeatures = NULL, ...)
           {
             extras <- list(...)              
             if(is.character(classifier))
             {
-              trainParams <- .classifierKeywordToParams(classifier)[[1]] # Get a default params object.
+              TPparams <- .classifierKeywordToParams(classifier, autoTune)
+              trainParams <- TPparams[[1]] # Get a default params object.
               if(is.null(getFeatures) && !is.null(trainParams@getFeatures))
                 getFeatures <- trainParams@getFeatures
+              if(is.null(tuneParams) && !is.null(trainParams@tuneParams))
+                tuneParams <- trainParams@tuneParams
               classifier <- trainParams@classifier # Training function.
             }
             if(ncol(characteristics) == 0 || !"Classifier Name" %in% characteristics[, "characteristic"])

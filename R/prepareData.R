@@ -268,7 +268,7 @@ setMethod("prepareData", "MultiAssayExperiment",
   # Get all desired measurements tables and clinical columns.
   # These form the independent variables to be used for making predictions with.
   # Variable names will have names like RNA_BRAF for traceability.
-  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures, outcomeColumns))
+  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures[["clinical"]], outcomeColumns))
   rownames(dataTable) <- dataTable[, "primary"]
   S4Vectors::mcols(dataTable)[, "sourceName"] <- gsub("colDataCols", "clinical", S4Vectors::mcols(dataTable)[, "sourceName"])
   dataTable <- dataTable[, -match("primary", colnames(dataTable))]

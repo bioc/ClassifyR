@@ -571,21 +571,21 @@ splitsTestInfo <- function(samplesSplits = c("k-Fold", "Permute k-Fold", "Permut
     )
 }
 
-.classifierKeywordToParams <- function(keyword)
+.classifierKeywordToParams <- function(keyword, autoTune = FALSE)
 {
     switch(
         keyword,
-        "randomForest" = RFparams(),
-        "randomSurvivalForest" = RSFparams(),
-        "XGB" = XGBparams(),
+        "randomForest" = RFparams(autoTune = autoTune),
+        "randomSurvivalForest" = RSFparams(autoTune = autoTune),
+        "XGB" = XGBparams(autoTune = autoTune),
         "GLM" = GLMparams(),
         "ridgeGLM" = ridgeGLMparams(),
         "elasticNetGLM" = elasticNetGLMparams(),
         "LASSOGLM" = LASSOGLMparams(),
-        "SVM" = SVMparams(),
+        "SVM" = SVMparams(autoTune = autoTune),
         "NSC" = NSCparams(),
         "DLDA" = DLDAparams(),
-        "naiveBayes" = naiveBayesParams(),
+        "naiveBayes" = naiveBayesParams(autoTune = autoTune),
         "mixturesNormals" = mixModelsParams(),
         "kNN" = kNNparams(),
         "CoxPH" = coxphParams(),
