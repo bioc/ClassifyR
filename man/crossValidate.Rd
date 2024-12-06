@@ -23,6 +23,7 @@
   selectionOptimisation = "Resubstitution",
   performanceType = "auto",
   classifier = "auto",
+  autoTune = FALSE,
   multiViewMethod = "none",
   assayCombinations = "all",
   nFolds = 5,
@@ -41,6 +42,7 @@
   selectionOptimisation = "Resubstitution",
   performanceType = "auto",
   classifier = "auto",
+  autoTune = FALSE,
   multiViewMethod = "none",
   assayCombinations = "all",
   nFolds = 5,
@@ -59,6 +61,7 @@
   selectionOptimisation = "Resubstitution",
   performanceType = "auto",
   classifier = "auto",
+  autoTune = FALSE,
   multiViewMethod = "none",
   assayCombinations = "all",
   nFolds = 5,
@@ -77,6 +80,7 @@
   selectionOptimisation = "Resubstitution",
   performanceType = "auto",
   classifier = "auto",
+  autoTune = FALSE,
   multiViewMethod = "none",
   assayCombinations = "all",
   nFolds = 5,
@@ -97,6 +101,7 @@
   selectionMethod = "auto",
   nFeatures = 20,
   classifier = "auto",
+  autoTune = FALSE,
   performanceType = "auto",
   multiViewMethod = "none",
   assayIDs = "all",
@@ -141,6 +146,8 @@ indepedent feature selection will be performed (but implicit selection might sti
 \item{classifier}{Default: \code{"auto"}. A character vector of classification methods to compare. If a named character vector with names corresponding to different assays, 
 and performing multiview classification, the respective classification methods will be used on each assay. If \code{"auto"}, then a random forest is used for a classification
 task or Cox proportional hazards model for a survival task.}
+
+\item{autoTune}{Default: \code{FALSE}. A logical value of length 1 indicating whether to perform parameter tuning on a prespecified range of values. See presets.html for the classifiers and their corresponding range of values.}
 
 \item{multiViewMethod}{Default: \code{"none"}. A character vector specifying the multiview method or data integration approach to use. See \code{available("multiViewMethod") for possibilities.}}
 

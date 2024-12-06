@@ -12,6 +12,7 @@
 \S4method{runTests}{DataFrame}(
   measurements,
   outcome,
+  group = NULL,
   crossValParams = CrossValParams(),
   modellingParams = ModellingParams(),
   characteristics = S4Vectors::DataFrame(),
@@ -19,7 +20,7 @@
   verbose = 1
 )
 
-\S4method{runTests}{MultiAssayExperiment}(measurements, outcome, ...)
+\S4method{runTests}{MultiAssayExperiment}(measurements, outcome, group = NULL, ...)
 }
 \arguments{
 \item{measurements}{Either a \code{\link{matrix}}, \code{\link{DataFrame}}
@@ -37,6 +38,12 @@ containing either classes or time and event information about survival. If
 columns (survival) in the table extracted by \code{colData(data)} that contain(s) the samples'
 outcome to use for prediction. If column names of survival information, time must be in first
 column and event status in the second.}
+
+\item{group}{Default: \code{NULL}. A vector specifying the group each sample belongs to, in case
+assigning all samples belonging to a particular group to a particular fold is desired. If
+\code{measurements} is a \code{MultiAssayExperiment}, the name of the column in the table extracted by
+\code{colData(data)} that contains the groupings.
+outcome}
 
 \item{crossValParams}{An object of class \code{\link{CrossValParams}},
 specifying the kind of cross-validation to be done.}
@@ -75,8 +82,9 @@ parallel is possible by leveraging the package \code{\link{BiocParallel}}.
     tuneList <- list(nFeatures = seq(5, 25, 5), performanceType = "Balanced Error")
     selectParams <- SelectParams("t-test", tuneParams = tuneList)
     modellingParams <- ModellingParams(selectParams = selectParams)
-    runTests(measurements, classes, CVparams, modellingParams,
-             DataFrame(characteristic = c("Assay Name", "Classifier Name"),
+    runTests(measurements, classes, crossValParams = CVparams,
+             modellingParams = modellingParams,
+             characteristics = DataFrame(characteristic = c("Assay Name", "Classifier Name"),
                        value = c("Asthma", "Different Means"))
              )
   #}

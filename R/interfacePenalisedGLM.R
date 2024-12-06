@@ -5,7 +5,7 @@ penalisedGLMtrainInterface <- function(measurementsTrain, classesTrain, lambda =
   if(!requireNamespace("glmnet", quietly = TRUE))
     stop("The package 'glmnet' could not be found. Please install it.")
   if(verbose == 3)
-    message("Fitting elastic net regularised GLM classifier to data.")
+    message(Sys.time(), ": Fitting elastic net regularised GLM classifier to data.")
 
   # One-hot encoding needed.    
   measurementsTrain <- MatrixModels::model.Matrix(~ 0 + ., data = measurementsTrain)

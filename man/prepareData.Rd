@@ -16,12 +16,19 @@
 \S4method{prepareData}{DataFrame}(
   measurements,
   outcome,
+  group = NULL,
   useFeatures = NULL,
   maxMissingProp = 0,
   topNvariance = NULL
 )
 
-\S4method{prepareData}{MultiAssayExperiment}(measurements, outcomeColumns = NULL, useFeatures = NULL, ...)
+\S4method{prepareData}{MultiAssayExperiment}(
+  measurements,
+  outcomeColumns = NULL,
+  group = NULL,
+  useFeatures = NULL,
+  ...
+)
 
 \S4method{prepareData}{list}(measurements, outcome = NULL, useFeatures = NULL, ...)
 }
@@ -39,6 +46,8 @@ are features.}
 a character string, or vector of such strings, containing column name(s) of column(s)
 containing either classes or time and event information about survival. If column names
 of survival information, time must be in first column and event status in the second.}
+
+\item{group}{Not user-specified. Only passed by \code{runTests} for subsetting.}
 
 \item{useFeatures}{Default: \code{NULL} (i.e. use all provided features). If \code{measurements} is a \code{MultiAssayExperiment} or list of tabular data,
 a named list of features to use. Otherwise, the input data is a single table and this can just be a vector of feature names.

@@ -1,4 +1,5 @@
 #' Reproducibly Run Various Kinds of Cross-Validation
+#' 
 #' Enables doing classification schemes such as ordinary 10-fold, 100
 #' permutations 5-fold, and leave one out cross-validation. Processing in
 #' parallel is possible by leveraging the package \code{\link{BiocParallel}}.
@@ -51,8 +52,9 @@
 #'     tuneList <- list(nFeatures = seq(5, 25, 5), performanceType = "Balanced Error")
 #'     selectParams <- SelectParams("t-test", tuneParams = tuneList)
 #'     modellingParams <- ModellingParams(selectParams = selectParams)
-#'     runTests(measurements, classes, CVparams, modellingParams,
-#'              DataFrame(characteristic = c("Assay Name", "Classifier Name"),
+#'     runTests(measurements, classes, crossValParams = CVparams,
+#'              modellingParams = modellingParams,
+#'              characteristics = DataFrame(characteristic = c("Assay Name", "Classifier Name"),
 #'                        value = c("Asthma", "Different Means"))
 #'              )
 #'   #}
@@ -117,7 +119,7 @@ input data. Autmomatically reducing to smaller number.")
   results <- bpmapply(function(trainingSamples, testSamples, setNumber)
   {
     if(verbose >= 1 && setNumber %% 10 == 0)
-      message("Processing sample set ", setNumber, '.')
+      message(Sys.time(), ": Processing sample set ", setNumber, '.')
     
     # crossValParams is needed at least for nested feature tuning.
     
@@ -132,7 +134,7 @@ input data. Autmomatically reducing to smaller number.")
   resultErrors <- sapply(results, function(result) is.character(result))
   if(sum(resultErrors) == length(results))
   {
-      message("Error: All cross-validations had an error.")
+      message(Sys.time(), " - Error: All cross-validations had an error.")
       if(length(unique(unlist(results))) == 1)
         stop("The common problem is: ", unlist(results)[[1]])
       return(results)

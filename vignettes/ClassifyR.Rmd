@@ -217,7 +217,7 @@ ModellingParams()
 
 ```{r, tidy = FALSE}
 crossValParams <- CrossValParams(permutations = 5)
-DMresults <- runTests(measurements, classes, crossValParams, verbose = 1)
+DMresults <- runTests(measurements, classes, crossValParams = crossValParams, verbose = 1)
 ```
 
 Here, 5 permutations (non-default) and 5 folds cross-validation (default) is specified. For computers with more than 1 CPU, the number of cores to use can be given to *runTests* by using the argument *parallelParams*. The parameter *seed* is important to set for result reproducibility when doing a cross-validation such as this, because it employs randomisation to partition the samples into folds. Also, *RNGseed* is highly recommended to be set to the back-end specified to *BPPARAM* if doing parallel processing. The first seed mentioned does not work for parallel processes. For more details about *runTests* and the parameter classes used by it, consult the help pages of such functions.
@@ -258,7 +258,9 @@ The *samplesMetricMap* function allows the visual comparison of sample-wise erro
 modellingParamsDD <- ModellingParams(selectParams = SelectParams("KL"),
                                      trainParams = TrainParams("naiveBayes"),
                                      predictParams = NULL)
-DDresults <- runTests(measurements, classes, crossValParams, modellingParamsDD, verbose = 1)
+DDresults <- runTests(measurements, classes,
+                      crossValParams = crossValParams,
+                      modellingParams = modellingParamsDD, verbose = 1)
 DDresults
 ```
 
@@ -325,7 +327,8 @@ Tuning is achieved in ClassifyR by providing a variable called *tuneParams* to t
 tuneList <- list(cost = c(0.01, 0.1, 1, 10))
 SVMparams <- ModellingParams(trainParams = TrainParams("SVM", kernel = "linear", tuneParams = tuneList),
                              predictParams = PredictParams("SVM"))
-SVMresults <- runTests(measurements, classes, crossValParams, SVMparams)
+SVMresults <- runTests(measurements, classes, crossValParams = crossValParams,
+                       modellingParams = SVMparams)
 ```
 
 The index of chosen of the parameters, as well as all combinations of parameters and their associated performance metric, are stored for every validation, and can be accessed with the *tunedParameters* function.

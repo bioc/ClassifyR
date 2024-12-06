@@ -5,7 +5,7 @@ coxnetTrainInterface <- function(measurementsTrain, survivalTrain, lambda = NULL
   if(!requireNamespace("glmnet", quietly = TRUE))
     stop("The package 'glmnet' could not be found. Please install it.")
   if(verbose == 3)
-    message("Fitting coxnet model to data.")
+    message(Sys.time(), ": Fitting coxnet model to data.")
     
   measurementsTrain <- data.frame(measurementsTrain, check.names = FALSE)
   measurementsMatrix <- glmnet::makeX(as(measurementsTrain, "data.frame"))
