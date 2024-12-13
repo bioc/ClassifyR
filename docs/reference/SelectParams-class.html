@@ -11,7 +11,7 @@ feature selection. The empty constructor is provided for convenience."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,15 +57,18 @@ feature selection. The empty constructor is provided for convenience.</p>
     <h2 id="constructor">Constructor<a class="anchor" aria-label="anchor" href="#constructor"></a></h2>
 
 
-<dl><dt><code>SelectParams(featureRanking, characteristics = DataFrame(), minPresence = 1, intermediate = character(0),subsetToSelections = TRUE, tuneParams = list(nFeatures = seq(10, 100, 10), performanceType = "Balanced Accuracy"), ...)</code></dt>
+<dl><dt><code>SelectParams(featureRanking, characteristics = DataFrame(), nFeatures = 20, minPresence = 1, intermediate = character(0), subsetToSelections = TRUE, tuneParams = list(nFeatures = seq(10, 100, 10)), ...)</code></dt>
 <dd><p>Creates a <code>SelectParams</code> object which stores the function(s) which will do the selection and parameters that the function will use.<br></p><dl><dt><code>featureRanking</code></dt>
 <dd><p>A character keyword referring to a registered feature ranking function. See <code><a href="available.html">available</a></code> for valid keywords.</p></dd>
 
         <dt><code>characteristics</code></dt>
 <dd><p>A <code>DataFrame</code> describing the characteristics of feature selection to be done. First column must be named <code>"charateristic"</code> and second column must be named <code>"value"</code>. If using wrapper functions for feature selection in this package, the feature selection name will automatically be generated and therefore it is not necessary to specify it.</p></dd>
 
+        <dt><code>nFeatures</code></dt>
+<dd><p>Default: <code>20</code>. The number of top-ranked features to choose. Can also be <code>NULL</code> if a vector of top numbers is specified to <code>tuneParams</code> for the list element named <code>nFeatures</code>.</p></dd>
+
         <dt><code>minPresence</code></dt>
-<dd><p>If a list of functions was provided, how many of those must a feature have been selected by to be used in classification. 1 is equivalent to a set union and a number the same length as <code>featureSelection</code> is equivalent to set intersection.</p></dd>
+<dd><p>Default: <code>1</code>. If a list of functions was provided, how many of those must a feature have been selected by to be used in classification. 1 is equivalent to a set union and a number the same length as <code>featureSelection</code> is equivalent to set intersection.</p></dd>
 
         <dt><code>intermediate</code></dt>
 <dd><p>Character vector. Names of any variables created in prior stages by <code><a href="runTest.html">runTest</a></code> that need to be passed to a feature selection function.</p></dd>
@@ -74,7 +77,7 @@ feature selection. The empty constructor is provided for convenience.</p>
 <dd><p>Whether to subset the data table(s), after feature selection has been done.</p></dd>
 
         <dt><code>tuneParams</code></dt>
-<dd><p>A list specifying tuning parameters required during feature selection. The names of the list are the names of the parameters and the vectors are the values of the parameters to try. All possible combinations are generated. Two elements named <code>nFeatures</code> and <code>performanceType</code> are mandatory, to define the performance metric which will be used to select features and how many top-ranked features to try.</p></dd>
+<dd><p>A list specifying tuning parameters to try during feature selection. A list element named <code>nFeatures</code> is used to represent a variety of top-n ranked features to try. Other names of the list are the names of the parameters of the ranking function and the vectors are the values of the ranking function's parameters to try. All possible combinations are generated.</p></dd>
 
         <dt><code>...</code></dt>
 <dd><p>Other named parameters which will be used by the selection function. If <code>featureSelection</code> was a list of functions, this must be a list of lists, as long as <code>featureSelection</code>.</p></dd>

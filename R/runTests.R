@@ -18,11 +18,6 @@
 #' columns (survival) in the table extracted by \code{colData(data)} that contain(s) the samples'
 #' outcome to use for prediction. If column names of survival information, time must be in first
 #' column and event status in the second.
-#' @param group Default: \code{NULL}. A vector specifying the group each sample belongs to, in case
-#' assigning all samples belonging to a particular group to a particular fold is desired. If
-#' \code{measurements} is a \code{MultiAssayExperiment}, the name of the column in the table extracted by
-#' \code{colData(data)} that contains the groupings.
-#' outcome
 #' @param crossValParams An object of class \code{\link{CrossValParams}},
 #' specifying the kind of cross-validation to be done.
 #' @param modellingParams An object of class \code{\link{ModellingParams}},
@@ -48,13 +43,13 @@
 #'   #{
 #'     data(asthma)
 #'     
-#'     CVparams <- CrossValParams(permutations = 5)
-#'     tuneList <- list(nFeatures = seq(5, 25, 5), performanceType = "Balanced Error")
+#'     CVparams <- CrossValParams(permutations = 5, tuneMode = "Resubstitution")
+#'     tuneList <- list(nFeatures = seq(5, 25, 5))
+#'     attr(tuneList, "performanceType") <- "Balanced Error"
 #'     selectParams <- SelectParams("t-test", tuneParams = tuneList)
 #'     modellingParams <- ModellingParams(selectParams = selectParams)
-#'     runTests(measurements, classes, crossValParams = CVparams,
-#'              modellingParams = modellingParams,
-#'              characteristics = DataFrame(characteristic = c("Assay Name", "Classifier Name"),
+#'     runTests(measurements, classes, CVparams, modellingParams,
+#'              DataFrame(characteristic = c("Assay Name", "Classifier Name"),
 #'                        value = c("Asthma", "Different Means"))
 #'              )
 #'   #}
@@ -75,7 +70,7 @@ setMethod("runTests", c("matrix"), function(measurements, outcome, ...) # Matrix
 #' @rdname runTests
 #' @import BiocParallel
 #' @export
-setMethod("runTests", "DataFrame", function(measurements, outcome, group = NULL, crossValParams = CrossValParams(), modellingParams = ModellingParams(),
+setMethod("runTests", "DataFrame", function(measurements, outcome, crossValParams = CrossValParams(), modellingParams = ModellingParams(),
            characteristics = S4Vectors::DataFrame(), ..., verbose = 1)
 {
   if(is.null(rownames(measurements)))
@@ -90,24 +85,36 @@ setMethod("runTests", "DataFrame", function(measurements, outcome, group = NULL,
   originalFeatures <- colnames(measurements)
   if("assay" %in% colnames(S4Vectors::mcols(measurements)))
       originalFeatures <- S4Vectors::mcols(measurements)[, c("assay", "feature")]                 
-  splitDataset <- prepareData(measurements, outcome, group, ...)
+  splitDataset <- prepareData(measurements, outcome, ...)
   measurements <- splitDataset[["measurements"]]
   outcome <- splitDataset[["outcome"]]
-  group <- splitDataset[["group"]]
-
-  if(!is.null(modellingParams@selectParams) && max(modellingParams@selectParams@tuneParams[["nFeatures"]]) > ncol(measurements))
+  
+  if(crossValParams@performanceType == "auto")
   {
-      warning("Attempting to evaluate more features for feature selection than in
+    if(is.factor(outcome)) crossValParams@performanceType <- "Balanced Accuracy" else
+      crossValParams@performanceType <- "C-index"    
+  }
+  if(!is.null(modellingParams@selectParams))
+  {
+    nFeatures <- modellingParams@selectParams@tuneParams[["nFeatures"]]
+    if(is.null(nFeatures)) nFeatures <- modellingParams@selectParams@nFeatures
+  }
+  if(!is.null(modellingParams@selectParams) && max(nFeatures) > ncol(measurements))
+  {
+    warning("Attempting to evaluate more features for feature selection than in
 input data. Autmomatically reducing to smaller number.")
-      modellingParams@selectParams@tuneParams[["nFeatures"]] <- 1:min(10, ncol(measurements))
+    if(is.null(modellingParams@selectParams@nFeatures))
+      modellingParams@selectParams@tuneParams[["nFeatures"]][modellingParams@selectParams@tuneParams[["nFeatures"]] > max(nFeatures)] <- max(nFeatures)
+    else
+      modellingParams@selectParams@nFeatures <- max(nFeatures)
   }
   
   # Element names of the list returned by runTest, in order.
   resultTypes <- c("ranked", "selected", "models", "testSet", "predictions", "tune", "importance")
 
   # Create all partitions of training and testing sets.
-  samplesSplits <- .samplesSplits(crossValParams, outcome, group)
-  splitsTestInfo <- .splitsTestInfo(crossValParams, samplesSplits)
+  samplesSplitsList <- samplesSplits(crossValParams@samplesSplits, crossValParams@permutations, crossValParams@folds, crossValParams@percentTest, crossValParams@leave, outcome)
+  splitsTestInfoTable <- splitsTestInfo(crossValParams@samplesSplits, crossValParams@permutations, crossValParams@folds, crossValParams@percentTest, crossValParams@leave, samplesSplitsList)
   
   # Necessary hack for parallel processing on Windows.
   modellingParams <- modellingParams
@@ -127,7 +134,7 @@ input data. Autmomatically reducing to smaller number.")
             measurements[testSamples, , drop = FALSE], outcome[testSamples],
             crossValParams, modellingParams, characteristics, verbose,
             .iteration = setNumber)
-  }, samplesSplits[["train"]], samplesSplits[["test"]], (1:length(samplesSplits[["train"]])),
+  }, samplesSplitsList[["train"]], samplesSplitsList[["test"]], (1:length(samplesSplitsList[["train"]])),
   BPPARAM = crossValParams@parallelParams, SIMPLIFY = FALSE)
 
   # Error checking and reporting.
@@ -142,10 +149,10 @@ input data. Autmomatically reducing to smaller number.")
   {
     warning(paste(sum(resultErrors),  "cross-validations, but not all, had an error and have been removed from the results."))
     results <- results[!resultErrors]
-    iterationID <- do.call(paste, as.data.frame(splitsTestInfo))
+    iterationID <- do.call(paste, as.data.frame(splitsTestInfoTable))
     iterationIDlevels <- unique(iterationID)
     errorRows <- iterationID %in% iterationIDlevels[which(resultErrors)]
-    splitsTestInfo <- splitsTestInfo[!errorRows, ]
+    splitsTestInfoTable <- splitsTestInfoTable[!errorRows, ]
   }
   
   validationText <- .validationText(crossValParams)
@@ -170,10 +177,10 @@ input data. Autmomatically reducing to smaller number.")
         predictsColumnName <- "risk"
     else # Classification task. A factor.
         predictsColumnName <- "class"
-    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfo, unlist(lapply(results, "[[", "predictions")), check.names = FALSE)
+    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfoTable, unlist(lapply(results, "[[", "predictions")), check.names = FALSE)
     colnames(predictionsTable)[ncol(predictionsTable)] <- predictsColumnName
   } else { # data frame
-    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfo, do.call(rbind, lapply(results, "[[", "predictions")), check.names = FALSE)
+    predictionsTable <- S4Vectors::DataFrame(sample = unlist(lapply(results, "[[", "testSet")), splitsTestInfoTable, do.call(rbind, lapply(results, "[[", "predictions")), check.names = FALSE)
   }
   rownames(predictionsTable) <- NULL
   tuneList <- lapply(results, "[[", "tune")
@@ -199,7 +206,7 @@ input data. Autmomatically reducing to smaller number.")
 #' @import MultiAssayExperiment methods
 #' @export
 setMethod("runTests", c("MultiAssayExperiment"),
-          function(measurements, outcome, group = NULL, ...)
+          function(measurements, outcome, ...)
 {
   prepArgs <- list(measurements, outcome)              
   extraInputs <- list(...)
@@ -209,9 +216,8 @@ setMethod("runTests", c("MultiAssayExperiment"),
   if(length(prepExtras) > 0)
     prepArgs <- append(prepArgs, extraInputs[prepExtras])
   measurementsAndOutcome <- do.call(prepareData, prepArgs)
-
-  runTestsArgs <- list(measurementsAndOutcome[["measurements"]], measurementsAndOutcome[["outcome"]],
-                       measurementsAndOutcome[["group"]])
+  
+  runTestsArgs <- list(measurementsAndOutcome[["measurements"]], measurementsAndOutcome[["outcome"]])
   if(length(extraInputs) > 0 && (length(prepExtras) == 0 || length(extraInputs[-prepExtras]) > 0))
   {
     if(length(prepExtras) == 0) runTestsArgs <- append(runTestsArgs, extraInputs) else

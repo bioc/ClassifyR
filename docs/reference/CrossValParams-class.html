@@ -9,7 +9,7 @@ runTests."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,8 @@ runTests."></head><body>
 <span>  percentTest <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>  folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  leave <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  tuneMode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Resubstitution"</span>, <span class="st">"Nested CV"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  tuneMode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"Resubstitution"</span>, <span class="st">"Nested CV"</span><span class="op">)</span>,</span>
+<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  adaptiveResamplingDelta <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parallelParams <span class="op">=</span> <span class="fu">bpparam</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -101,7 +102,12 @@ sometimes written as LOOCV.</p></dd>
 
 
 <dt id="arg-tunemode">tuneMode<a class="anchor" aria-label="anchor" href="#arg-tunemode"></a></dt>
-<dd><p>Default: Resubstitution. The scheme to use for selecting any tuning parameters.</p></dd>
+<dd><p>Default: None. The cross-validation scheme to use for selecting any tuning parameters. Valid values
+are <code>"Resubstitution"</code>, <code>"Nested CV"</code>, <code>"none"</code>.</p></dd>
+
+
+<dt id="arg-performancetype">performanceType<a class="anchor" aria-label="anchor" href="#arg-performancetype"></a></dt>
+<dd><p>Default: <code>"auto"</code>. The performance metric to use if <code>tuneMode</code> is not <code>"none"</code>.</p></dd>
 
 
 <dt id="arg-adaptiveresamplingdelta">adaptiveResamplingDelta<a class="anchor" aria-label="anchor" href="#arg-adaptiveresamplingdelta"></a></dt>
@@ -146,14 +152,17 @@ choose a specific back-end depending on your operating system and also set
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "tuneMode":</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Resubstitution"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "none"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Slot "performanceType":</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "adaptiveResamplingDelta":</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "parallelParams":</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: MulticoreParam</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   bpisup: FALSE; bpnworkers: 24; bptasks: 0; bpjobname: BPJOB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   bpisup: FALSE; bpnworkers: 30; bptasks: 0; bpjobname: BPJOB</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   bplog: FALSE; bpthreshold: INFO; bpstopOnError: TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   bpRNGseed: ; bptimeout: NA; bpprogressbar: FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   bpexportglobals: TRUE; bpexportvariables: FALSE; bpforceGC: FALSE</span>
@@ -181,7 +190,10 @@ choose a specific back-end depending on your operating system and also set
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "tuneMode":</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Resubstitution"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "none"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Slot "performanceType":</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "adaptiveResamplingDelta":</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>

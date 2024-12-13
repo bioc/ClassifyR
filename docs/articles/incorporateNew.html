@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,10 +104,10 @@ outline is:</li>
 a row specifying the function name and a nice title to use for plot
 labelling. For example,</li>
 </ol>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>.ClassifyRenvir[[<span class="st">"functionsTable"</span>]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ...        ...</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">"newFancyClassifier"</span>, <span class="st">"Fancy Classifier"</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    ...        ...</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>.ClassifyRenvir[[<span class="st">"functionsTable"</span>]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    ...        ...</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="st">"newFancyClassifier"</span>, <span class="st">"Fancy Classifier"</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    ...        ...</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>Add a keyword that users will use when the want to use the function
 in cross-validation to one of the keywords two-column matrices along
@@ -115,10 +115,10 @@ with a short one-sentence description. In the example, the new function
 is a classifier, so it is added to the end of the
 <code>"classifyKeywords"</code> matrix.</li>
 </ol>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>.ClassifyRenvir[[<span class="st">"classifyKeywords"</span>]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ...        ...</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">"fancy"</span>, <span class="st">"Very good classifier that predicts amazingly well."</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    ...        ...</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>.ClassifyRenvir[[<span class="st">"classifyKeywords"</span>]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    ...        ...</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="st">"fancy"</span>, <span class="st">"Very good classifier that predicts amazingly well."</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    ...        ...</span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li><p>Depending on what kind of functionality the new function
 provides, add an entry into either

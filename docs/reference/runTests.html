@@ -11,7 +11,7 @@ parallel is possible by leveraging the package BiocParallel."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,6 @@ parallel is possible by leveraging the package <code>BiocParallel</code>.</p>
 <span><span class="fu">runTests</span><span class="op">(</span></span>
 <span>  <span class="va">measurements</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
-<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  crossValParams <span class="op">=</span> <span class="fu"><a href="CrossValParams-class.html">CrossValParams</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  modellingParams <span class="op">=</span> <span class="fu"><a href="ModellingParams-class.html">ModellingParams</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  characteristics <span class="op">=</span> <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -70,7 +69,7 @@ parallel is possible by leveraging the package <code>BiocParallel</code>.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'MultiAssayExperiment'</span></span>
-<span><span class="fu">runTests</span><span class="op">(</span><span class="va">measurements</span>, <span class="va">outcome</span>, group <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">runTests</span><span class="op">(</span><span class="va">measurements</span>, <span class="va">outcome</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -97,14 +96,6 @@ containing either classes or time and event information about survival. If
 columns (survival) in the table extracted by <code>colData(data)</code> that contain(s) the samples'
 outcome to use for prediction. If column names of survival information, time must be in first
 column and event status in the second.</p></dd>
-
-
-<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
-<dd><p>Default: <code>NULL</code>. A vector specifying the group each sample belongs to, in case
-assigning all samples belonging to a particular group to a particular fold is desired. If
-<code>measurements</code> is a <code>MultiAssayExperiment</code>, the name of the column in the table extracted by
-<code>colData(data)</code> that contains the groupings.
-outcome</p></dd>
 
 
 <dt id="arg-crossvalparams">crossValParams<a class="anchor" aria-label="anchor" href="#arg-crossvalparams"></a></dt>
@@ -150,13 +141,13 @@ more lower-level functions print messages.</p></dd>
 <span class="r-in"><span>  <span class="co">#{</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">asthma</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    </span></span>
-<span class="r-in"><span>    <span class="va">CVparams</span> <span class="op">&lt;-</span> <span class="fu"><a href="CrossValParams-class.html">CrossValParams</a></span><span class="op">(</span>permutations <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">tuneList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>nFeatures <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">25</span>, <span class="fl">5</span><span class="op">)</span>, performanceType <span class="op">=</span> <span class="st">"Balanced Error"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">CVparams</span> <span class="op">&lt;-</span> <span class="fu"><a href="CrossValParams-class.html">CrossValParams</a></span><span class="op">(</span>permutations <span class="op">=</span> <span class="fl">5</span>, tuneMode <span class="op">=</span> <span class="st">"Resubstitution"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">tuneList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>nFeatures <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">25</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">tuneList</span>, <span class="st">"performanceType"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Balanced Error"</span></span></span>
 <span class="r-in"><span>    <span class="va">selectParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="SelectParams-class.html">SelectParams</a></span><span class="op">(</span><span class="st">"t-test"</span>, tuneParams <span class="op">=</span> <span class="va">tuneList</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">modellingParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="ModellingParams-class.html">ModellingParams</a></span><span class="op">(</span>selectParams <span class="op">=</span> <span class="va">selectParams</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu">runTests</span><span class="op">(</span><span class="va">measurements</span>, <span class="va">classes</span>, crossValParams <span class="op">=</span> <span class="va">CVparams</span>,</span></span>
-<span class="r-in"><span>             modellingParams <span class="op">=</span> <span class="va">modellingParams</span>,</span></span>
-<span class="r-in"><span>             characteristics <span class="op">=</span> <span class="fu">DataFrame</span><span class="op">(</span>characteristic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Assay Name"</span>, <span class="st">"Classifier Name"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu">runTests</span><span class="op">(</span><span class="va">measurements</span>, <span class="va">classes</span>, <span class="va">CVparams</span>, <span class="va">modellingParams</span>,</span></span>
+<span class="r-in"><span>             <span class="fu">DataFrame</span><span class="op">(</span>characteristic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Assay Name"</span>, <span class="st">"Classifier Name"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                       value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Asthma"</span>, <span class="st">"Different Means"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>             <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An object of class 'ClassifyResult'.</span>

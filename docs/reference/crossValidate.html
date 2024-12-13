@@ -15,7 +15,7 @@ independent validation data set."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,10 +66,7 @@ independent validation data set.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  nFeatures <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  selectionMethod <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  selectionOptimisation <span class="op">=</span> <span class="st">"Resubstitution"</span>,</span>
-<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  classifier <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  autoTune <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  multiViewMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  assayCombinations <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  nFolds <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -86,10 +83,7 @@ independent validation data set.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  nFeatures <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  selectionMethod <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  selectionOptimisation <span class="op">=</span> <span class="st">"Resubstitution"</span>,</span>
-<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  classifier <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  autoTune <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  multiViewMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  assayCombinations <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  nFolds <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -106,10 +100,7 @@ independent validation data set.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  nFeatures <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  selectionMethod <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  selectionOptimisation <span class="op">=</span> <span class="st">"Resubstitution"</span>,</span>
-<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  classifier <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  autoTune <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  multiViewMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  assayCombinations <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  nFolds <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -126,10 +117,7 @@ independent validation data set.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  nFeatures <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  selectionMethod <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  selectionOptimisation <span class="op">=</span> <span class="st">"Resubstitution"</span>,</span>
-<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  classifier <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  autoTune <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  multiViewMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  assayCombinations <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  nFolds <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -153,8 +141,6 @@ independent validation data set.</p>
 <span>  selectionMethod <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  nFeatures <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  classifier <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  autoTune <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  multiViewMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  assayIDs <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  extraParams <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -195,35 +181,22 @@ of survival information, time must be in first column and event status in the se
 
 
 <dt id="arg-nfeatures">nFeatures<a class="anchor" aria-label="anchor" href="#arg-nfeatures"></a></dt>
-<dd><p>The number of features to be used for classification. If this is a single number, the same number of features will be used for all comparisons
-or assays. If a numeric vector these will be optimised over using <code>selectionOptimisation</code>. If a named vector with the same names of multiple assays,
-a different number of features will be used for each assay. If a named list of vectors, the respective number of features will be optimised over.
-Set to NULL or "all" if all features should be used.</p></dd>
+<dd><p>The number of features to be used for classification. If a named vector with the same names of multiple assays,
+a different number of features will be used for each assay. Set to <code>"all"</code> if all features should be used. To tune it, specify a vector or <code>list</code> of named vectors to <code>"tuneParams"</code> list of
+<code>"select"</code> element list of <code>extraParams</code> list.</p></dd>
 
 
 <dt id="arg-selectionmethod">selectionMethod<a class="anchor" aria-label="anchor" href="#arg-selectionmethod"></a></dt>
 <dd><p>Default: <code>"auto"</code>. A character vector of feature selection methods to compare. If a named character vector with names corresponding to different assays,
 and performing multiview classification, the respective selection methods will be used on each assay. If <code>"auto"</code>, t-test (two categories) / F-test (three or more categories) ranking
 and top <code>nFeatures</code> optimisation is done. Otherwise, the ranking method is per-feature Cox proportional hazards p-value. <code>"none"</code> is also a valid value, meaning that no
-indepedent feature selection will be performed (but implicit selection might still happen with the classifier).</p></dd>
-
-
-<dt id="arg-selectionoptimisation">selectionOptimisation<a class="anchor" aria-label="anchor" href="#arg-selectionoptimisation"></a></dt>
-<dd><p>A character of "Resubstitution", "Nested CV" or "none" specifying the approach used to optimise <code>nFeatures</code>.</p></dd>
-
-
-<dt id="arg-performancetype">performanceType<a class="anchor" aria-label="anchor" href="#arg-performancetype"></a></dt>
-<dd><p>Performance metric to optimise if classifier has any tuning parameters.</p></dd>
+feature selection prior to model building will be performed (but implicit selection might still happen with the classifier).</p></dd>
 
 
 <dt id="arg-classifier">classifier<a class="anchor" aria-label="anchor" href="#arg-classifier"></a></dt>
 <dd><p>Default: <code>"auto"</code>. A character vector of classification methods to compare. If a named character vector with names corresponding to different assays,
 and performing multiview classification, the respective classification methods will be used on each assay. If <code>"auto"</code>, then a random forest is used for a classification
 task or Cox proportional hazards model for a survival task.</p></dd>
-
-
-<dt id="arg-autotune">autoTune<a class="anchor" aria-label="anchor" href="#arg-autotune"></a></dt>
-<dd><p>Default: <code>FALSE</code>. A logical value of length 1 indicating whether to perform parameter tuning on a prespecified range of values. See presets.html for the classifiers and their corresponding range of values.</p></dd>
 
 
 <dt id="arg-multiviewmethod">multiViewMethod<a class="anchor" aria-label="anchor" href="#arg-multiviewmethod"></a></dt>
@@ -253,9 +226,10 @@ with each element being a vector of assays to combine. Special value <code>"all"
 
 <dt id="arg-extraparams">extraParams<a class="anchor" aria-label="anchor" href="#arg-extraparams"></a></dt>
 <dd><p>A list of parameters that will be used to overwrite default settings of transformation, selection, or model-building functions or
-parameters which will be passed into the data cleaning function. The names of the list must be one of <code>"prepare"</code>,
-<code>"select"</code>, <code>"train"</code>, <code>"predict"</code>. To remove one of the defaults (see the article titled Parameter Tuning Presets for crossValidate and Their Customisation on
-the website), specify the list element to be <code>NULL</code>. For the valid element names in the <code>"prepare"</code> list, see <code><a href="prepareData.html">?prepareData</a></code>.</p></dd>
+parameters which will be passed into the data cleaning function or cross-validation mode used for parameter tuning. Each name of a list element is a list and must be one of <code>"prepare"</code>,
+<code>"select"</code>, <code>"train"</code>, <code>"predict"</code>, <code>tuneCross</code>. By default, no parameter tuning is done. To use the a default parameter range for tuning (see the article titled Parameter Tuning Presets for crossValidate and Their Customisation on
+the website), specify a list element of <code>"select"</code> or <code>"train"</code> lists named <code>"tuneParams"</code> with value <code>"auto"</code>. To specify your own range of values, specify a <code>list</code> with names being the parameters in the functions
+described in the same article on the website. For the valid element names in the <code>"prepare"</code> list, see <code><a href="prepareData.html">?prepareData</a></code> for its parameter names. The list <code>"tuneCross"</code> can have elements named <code>"tuneMode"</code> and <code>"performanceType"</code>. Valid values for <code>"tuneMode"</code> are <code>"Resubstitution"</code> or <code>"Nested CV"</code>. For <code>"performanceType"</code>, it is any of the metrics which can be specified to <code><a href="calcPerformance.html">calcPerformance</a></code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -318,7 +292,7 @@ stored in a <code><a href="ClassifyResult-class.html">ClassifyResult</a></code> 
 <span class="r-in"><span><span class="co"># First make a toy example assay with multiple data types. We'll randomly assign different features to be clinical, gene or protein.</span></span></span>
 <span class="r-in"><span><span class="co"># set.seed(51773)</span></span></span>
 <span class="r-in"><span><span class="co"># measurements &lt;- DataFrame(measurements, check.names = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co"># mcols(measurements)$assay &lt;- c(rep("clinical",20),sample(c("gene", "protein"), ncol(measurements)-20, replace = TRUE))</span></span></span>
+<span class="r-in"><span><span class="co"># mcols(measurements)$assay &lt;- c(rep("clinical", 20), sample(c("gene", "protein"), ncol(measurements) - 20, replace = TRUE))</span></span></span>
 <span class="r-in"><span><span class="co"># mcols(measurements)$feature &lt;- colnames(measurements)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># We'll use different nFeatures for each assay. We'll also use repeated cross-validation with 5 repeats for speed in the example.</span></span></span>
