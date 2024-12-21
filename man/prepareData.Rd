@@ -16,19 +16,13 @@
 \S4method{prepareData}{DataFrame}(
   measurements,
   outcome,
-  group = NULL,
   useFeatures = NULL,
   maxMissingProp = 0,
+  maxSimilarity = 1,
   topNvariance = NULL
 )
 
-\S4method{prepareData}{MultiAssayExperiment}(
-  measurements,
-  outcomeColumns = NULL,
-  group = NULL,
-  useFeatures = NULL,
-  ...
-)
+\S4method{prepareData}{MultiAssayExperiment}(measurements, outcomeColumns = NULL, useFeatures = NULL, ...)
 
 \S4method{prepareData}{list}(measurements, outcome = NULL, useFeatures = NULL, ...)
 }
@@ -47,8 +41,6 @@ a character string, or vector of such strings, containing column name(s) of colu
 containing either classes or time and event information about survival. If column names
 of survival information, time must be in first column and event status in the second.}
 
-\item{group}{Not user-specified. Only passed by \code{runTests} for subsetting.}
-
 \item{useFeatures}{Default: \code{NULL} (i.e. use all provided features). If \code{measurements} is a \code{MultiAssayExperiment} or list of tabular data,
 a named list of features to use. Otherwise, the input data is a single table and this can just be a vector of feature names.
 For any assays not in the named list, all of their features are used. \code{"clinical"} is also a valid assay name and refers to the clinical data table.
@@ -56,6 +48,10 @@ This allows for the avoidance of variables such spike-in RNAs, sample IDs, sampl
 
 \item{maxMissingProp}{Default: 0.0. A proportion less than 1 which is the maximum
 tolerated proportion of missingness for a feature to be retained for modelling.}
+
+\item{maxSimilarity}{Default: 1. A number between 0 and 1 which is the maximum similarity between a pair of
+variables to be both kept in the data set. For numerical variables, the Pearson correlation is used and for categorical variables,
+the Chi-squared test p-value is used. For a pair that is too similar, the second variable will be excluded from the data set.}
 
 \item{topNvariance}{Default: NULL. If \code{measurements} is a \code{MultiAssayExperiment} or list of tabular data, a named integer vector of most variable 
 features per assay to subset to. If the input data is a single table, then simply a single integer.

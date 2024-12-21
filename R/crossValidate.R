@@ -747,6 +747,8 @@ CV <- function(measurements, outcome, x, outcomeTrain, measurementsTest, outcome
       if(is.character(classifyResults)) stop(classifyResults)
       fullResult <- runTest(measurements, outcome, measurements, outcome, crossValParams = crossValParams, modellingParams = modellingParams, characteristics = characteristics, .iteration = 1)
       classifyResults@finalModel <- fullResult$models
+      class(classifyResults@finalModel) <- c("trainedByClassifyR", classifyResults@finalModel)
+      attr(classifyResults@finalModel, "predictFunction") <- modellingParams@trainParams@classifier
     }
     
     classifyResults
@@ -797,7 +799,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
               if(isTuneCross && !extraParams[["tuneCross"]][["performanceType"]] %in% c("auto", .ClassifyRenvir[["performanceTypes"]]))
                 stop(paste("performanceType for tuning must be one of", paste(c("auto", .ClassifyRenvir[["performanceTypes"]]), collapse = ", "), "but is", extraParams[["tuneCross"]][["performanceType"]]))
               
-              isCategorical <- is.character(outcome) && (length(outcome) == 1 || length(outcome) == nrow(measurements)) || is.factor(outcome)
+              isCategorical <- is.character(outcomeTrain) && (length(outcomeTrain) == 1 || length(outcomeTrain) == nrow(measurements)) || is.factor(outcomeTrain)
               if(isTuneCross && extraParams[["tuneCross"]][["performanceType"]] == "auto")
                 if(isCategorical) extraParams[["tuneCross"]][["performanceType"]] <- "Balanced Accuracy" else extraParams[["tuneCross"]][["performanceType"]] <- "C-index"
               if(length(selectionMethod) == 1 && selectionMethod == "auto")
@@ -838,7 +840,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
                                     measurementsUse <- measurements
                                   }
 
-                                  classifierParams <- .classifierKeywordToParams(keyword = classifierForAssay)
+                                  classifierParams <- .classifierKeywordToParams(classifierForAssay, extraParams[["train"]][["tuneParams"]])
                                   if(!is.null(extraParams) && "train" %in% names(extraParams))
                                   {
                                      for(paramIndex in seq_along(extraParams[["train"]]))
@@ -922,6 +924,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
               if(multiViewMethod == "merge"){
                   measurementsUse <- measurements[, S4Vectors::mcols(measurements)[["assay"]] %in% assayIDs, drop = FALSE]
                   model <- .doTrain(measurementsUse, outcomeTrain, NULL, NULL, crossValParams, modellingParams, verbose = verbose)[["model"]]
+                  attr(model, "predictFunction") <- modellingParams@trainParams@classifier
                   class(model) <- c("trainedByClassifyR", class(model))
               }
 
@@ -948,6 +951,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
                                                               getFeatures = prevalFeatures),
                                     predictParams = PredictParams(prevalPredictInterface, characteristics = paramsAssays$clinical@predictParams@characteristics))
                  model <- .doTrain(measurementsUse, outcomeTrain, NULL, NULL, crossValParams, modellingParams, verbose = verbose)[["model"]]
+                 attr(model, "predictFunction") <- modellingParams@trainParams@classifier
                  class(model) <- c("trainedByClassifyR", class(model))
               }
               
@@ -965,6 +969,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
                                                              getFeatures = PCAfeatures),
                                    predictParams = PredictParams(pcaPredictInterface, characteristics = paramsClinical$clinical@predictParams@characteristics))
                 model <- .doTrain(measurementsUse, outcomeTrain, NULL, NULL, crossValParams, modellingParams, verbose = verbose)[["model"]]
+                attr(model, "predictFunction") <- modellingParams@trainParams@classifier
                 class(model) <- c("trainedByClassifyR", class(model))
               }
               if(missing(models) || is.null(models)) return(model) else return(models)
@@ -1050,12 +1055,12 @@ predict.trainedByClassifyR <- function(object, newData, outcome, ...)
                }, newData, names(newData))
     newData <- do.call(cbind, newData)
     } else if(is(newData, "MultiAssayExperiment"))
-            {
-              newData <- prepareData(newData, outcome)
+    {
+              newData <- prepareData(newData, outcome)[["measurements"]]
     }
     
     predictFunctionUse <- attr(object, "predictFunction")
-    class(object) <- rev(class(object)) # Now want the predict method of the specific model to be picked, so put model class first.
+    class(object) <- class(object)[-1] # Now want the predict method of the specific model to be picked, so put model class first.
     if (is(object, "listOfModels")) 
          mapply(function(model, assay) predictFunctionUse(model, assay), object, newData, MoreArgs = list(...), SIMPLIFY = FALSE)
     else do.call(predictFunctionUse, list(object, newData, ...)) # Object is itself a trained model and it is assumed that a predict method is defined for it.

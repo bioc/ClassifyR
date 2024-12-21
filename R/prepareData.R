@@ -15,7 +15,6 @@
 #' a character string, or vector of such strings, containing column name(s) of column(s)
 #' containing either classes or time and event information about survival. If column names
 #' of survival information, time must be in first column and event status in the second.
-#' @param group Not user-specified. Only passed by \code{runTests} for subsetting.
 #' @param outcomeColumns If \code{measurements} is a \code{MultiAssayExperiment}, the
 #' names of the column (class) or columns (survival) in the table extracted by \code{colData(data)}
 #' that contain(s) the each individual's outcome to use for prediction.
@@ -25,6 +24,9 @@
 #' This allows for the avoidance of variables such spike-in RNAs, sample IDs, sample acquisition dates, etc. which are not relevant for outcome prediction.
 #' @param maxMissingProp Default: 0.0. A proportion less than 1 which is the maximum
 #' tolerated proportion of missingness for a feature to be retained for modelling.
+#' @param maxSimilarity Default: 1. A number between 0 and 1 which is the maximum similarity between a pair of
+#' variables to be both kept in the data set. For numerical variables, the Pearson correlation is used and for categorical variables,
+#' the Chi-squared test p-value is used. For a pair that is too similar, the second variable will be excluded from the data set.
 #' @param topNvariance Default: NULL. If \code{measurements} is a \code{MultiAssayExperiment} or list of tabular data, a named integer vector of most variable 
 #' features per assay to subset to. If the input data is a single table, then simply a single integer.
 #' If an assays has less features, it won't be reduced in size but stay as-is.
@@ -56,10 +58,11 @@ setMethod("prepareData", "data.frame",
   prepareData(S4Vectors::DataFrame(measurements, check.names = FALSE), outcome, ...)
 })
 
+#' @importFrom dcanr cor.pairs
 #' @rdname prepareData
 #' @export
 setMethod("prepareData", "DataFrame",
-  function(measurements, outcome, group = NULL, useFeatures = NULL, maxMissingProp = 0.0, topNvariance = NULL)
+  function(measurements, outcome, useFeatures = NULL, maxMissingProp = 0.0, maxSimilarity = 1, topNvariance = NULL)
 {
   if(is.null(rownames(measurements)))
   {
@@ -184,7 +187,6 @@ setMethod("prepareData", "DataFrame",
   {
     measurements <- measurements[-dropSamples, ]
     outcome <- outcome[-dropSamples]  
-    if(!is.null(group)) group <- group[-dropSamples]
   }
   
   # Remove features or samples to ensure all features have less missingness than allowed.
@@ -222,7 +224,6 @@ setMethod("prepareData", "DataFrame",
     dropIndices <- match(dropSamples, rownames(measurements))      
     measurements <- measurements[-dropIndices, ]
     outcome <- outcome[-dropIndices]
-    if(!is.null(group)) group <- group[-dropIndices]
   }
   
   # Use only the most N variable features per assay.
@@ -241,20 +242,41 @@ setMethod("prepareData", "DataFrame",
     }))
   }
   
-  # Names are on both the covariates and outcome. Ensure consistent ordering.
-  if(!is.null(rownames(measurements)) && !is.null(names(outcome)))
+  if(maxSimilarity < 1)
   {
-      measurements <- measurements[match(names(outcome), rownames(measurements)), ]
-      group <- group[match(names(outcome), names(group))]
+    categoricalFeatures <- sapply(measurements, class) %in% c("factor", "character")
+    if(any(categoricalFeatures))
+    {
+      checkPairs <- combn(which(categoricalFeatures), 2)
+      pValues <- apply(checkPairs, 2, function(checkPair)
+      {
+        fisher.test(table(measurements[, checkPair[1]], measurements[, checkPair[2]]))$p.value
+      })
+      if(any(pValues) < maxSimilarity) dropFeatures <- checkPairs[2, which(pValues < maxSimilarity)]
+    }
+    numericFeatures <- sapply(measurements, class) == "numeric"
+    if(any(numericFeatures))
+    {
+        correlations <- dcanr::cor.pairs(as.matrix(measurements[, numericFeatures]))
+        diag(correlations) <- 0
+        dropFeatures <- c(dropFeatures, unique(which(correlations > maxSimilarity, arr.ind = TRUE)[, 2]))
+    }
+    dropFeatures <- character()
+    if(length(dropFeatures) > 0) measurements <- measurements[, setdiff(1:ncol(measurements), dropFeatures)]
   }
   
-  list(measurements = measurements, outcome = outcome, group = group)
+  
+  # Names are on both the covariates and outcome. Ensure consistent ordering.
+  if(!is.null(rownames(measurements)) && !is.null(names(outcome)))
+      measurements <- measurements[match(names(outcome), rownames(measurements)), ]
+  
+  list(measurements = measurements, outcome = outcome)
 })
 
 #' @rdname prepareData
 #' @export
 setMethod("prepareData", "MultiAssayExperiment",
-  function(measurements, outcomeColumns = NULL, group = NULL, useFeatures = NULL, ...)
+  function(measurements, outcomeColumns = NULL, useFeatures = NULL, ...)
 {
   if(is.null(useFeatures) || !"clinical" %in% names(useFeatures))
   {
@@ -274,12 +296,7 @@ setMethod("prepareData", "MultiAssayExperiment",
   # Get all desired measurements tables and clinical columns.
   # These form the independent variables to be used for making predictions with.
   # Variable names will have names like RNA_BRAF for traceability.
-  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures[["clinical"]], group, outcomeColumns))
-  if(!is.null(group))
-  {
-    group <- dataTable[, "group"]
-    dataTable <- dataTable[, -match("group", colnames(dataTable))]
-  }
+  dataTable <- MultiAssayExperiment::wideFormat(measurements, colDataCols = union(useFeatures[["clinical"]], outcomeColumns), check.names = FALSE)
   rownames(dataTable) <- dataTable[, "primary"]
   S4Vectors::mcols(dataTable)[, "sourceName"] <- gsub("colDataCols", "clinical", S4Vectors::mcols(dataTable)[, "sourceName"])
   dataTable <- dataTable[, -match("primary", colnames(dataTable))]
@@ -295,7 +312,7 @@ setMethod("prepareData", "MultiAssayExperiment",
   S4Vectors::mcols(dataTable) <- S4Vectors::mcols(dataTable)[, c("assay", "feature")]
     
   # Do other filtering and preparation in DataFrame function.
-  prepareData(dataTable, outcomeColumns, group = group, useFeatures = NULL, ...)
+  prepareData(dataTable, outcomeColumns, useFeatures = NULL, ...)
 })
 
 #' @rdname prepareData
