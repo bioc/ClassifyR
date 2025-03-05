@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.11.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,8 +53,12 @@
 <span><span class="co"># S3 method for class 'PrecisionPathways'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">0.5</span>, cost <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">bubblePlot</span><span class="op">(</span><span class="va">precisionPathways</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'PrecisionPathways'</span></span>
 <span><span class="fu">bubblePlot</span><span class="op">(</span><span class="va">precisionPathways</span>, pathwayColours <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">flowchart</span><span class="op">(</span><span class="va">precisionPathways</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'PrecisionPathways'</span></span>
 <span><span class="fu">flowchart</span><span class="op">(</span></span>
@@ -63,6 +67,8 @@
 <span>  nodeColours <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>assay <span class="op">=</span> <span class="st">"#86C57C"</span>, class1 <span class="op">=</span> <span class="st">"#ACCEE0"</span>, class2 <span class="op">=</span> <span class="st">"#F47F72"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">strataPlot</span><span class="op">(</span><span class="va">precisionPathways</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'PrecisionPathways'</span></span>
 <span><span class="fu">strataPlot</span><span class="op">(</span></span>
