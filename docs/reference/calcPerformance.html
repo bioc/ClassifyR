@@ -15,7 +15,7 @@ crossValidate, runTests or runTest with one of the user-specified performance me
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,6 +88,16 @@ ClassifyR package, a single metric value is calculated. If
 <span>  <span class="va">resultsList</span>,</span>
 <span>  performanceTypes <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  aggregate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"mean"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'MultiAssayExperimentOrList'</span></span>
+<span><span class="fu">easyHard</span><span class="op">(</span></span>
+<span>  <span class="va">measurements</span>,</span>
+<span>  <span class="va">result</span>,</span>
+<span>  assay <span class="op">=</span> <span class="st">"clinical"</span>,</span>
+<span>  useFeatures <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  performanceType <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  fitMode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"full"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,7 +115,8 @@ ClassifyR package, a single metric value is calculated. If
 
 <dt id="arg-performancetypes">performanceTypes<a class="anchor" aria-label="anchor" href="#arg-performancetypes"></a></dt>
 <dd><p>Default: <code>"auto"</code> A character vector. If <code>"auto"</code>, Balanced Accuracy will be used
-for a classification task and C-index for a time-to-event task.
+for a classification task and C-index for a time-to-event task. If using <code>easyHard</code>, the default is
+<code>"Sample Accuracy"</code> for a classification task and <code>"Sample C-index"</code> for a time-to-event task.
 Must be one of the following options:</p><ul><li><p><code>"Error"</code>: Ordinary error rate.</p></li>
 <li><p><code>"Accuracy"</code>: Ordinary accuracy.</p></li>
 <li><p><code>"Balanced Error"</code>: Balanced error rate.</p></li>
@@ -146,6 +157,29 @@ there are two classes.</p></li>
 <dd><p>Default: <code>"median"</code>. Can also be <code>"mean"</code>. If there are multiple values, such as for repeated
 cross-validation, then they are summarised to a single number using either mean or median.</p></dd>
 
+
+<dt id="arg-measurements">measurements<a class="anchor" aria-label="anchor" href="#arg-measurements"></a></dt>
+<dd><p>For <code>easyHard</code> only. Either a <code>DataFrame</code>, <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>, <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code>, <code>MultiAssayExperiment</code>
+or a list of the basic tabular objects containing the data.</p></dd>
+
+
+<dt id="arg-assay">assay<a class="anchor" aria-label="anchor" href="#arg-assay"></a></dt>
+<dd><p>For <code>easyHard</code> only. The assay to use to look for associations to the per-sample metric.</p></dd>
+
+
+<dt id="arg-performancetype">performanceType<a class="anchor" aria-label="anchor" href="#arg-performancetype"></a></dt>
+<dd><p>For <code>easyHard</code> only. One of the valid values shown for <code>performanceType</code> parameter of <code>calcCVperformance</code>.</p></dd>
+
+
+<dt id="arg-usefeatures">useFeatures<a class="anchor" aria-label="anchor" href="#arg-usefeatures"></a></dt>
+<dd><p>For <code>easyHard</code> only. Default: <code>NULL</code> (i.e. use all provided features). A vector of features to consider of the assay specified.
+This allows for the avoidance of variables such spike-in RNAs, sample IDs, sample acquisition dates, etc. which are not relevant for outcome prediction.</p></dd>
+
+
+<dt id="arg-fitmode">fitMode<a class="anchor" aria-label="anchor" href="#arg-fitmode"></a></dt>
+<dd><p>For <code>easyHard</code> only. Default:<code>"single"</code>. Either <code>"single"</code> or <code>"full"</code>. If <code>"single"</code>,
+an ordinary GLM model is fitted for each covariate separately. If <code>"full"</code>, elastic net is used to automatically tune the non-zero model coefficients.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -153,6 +187,7 @@ cross-validation, then they are summarised to a single number using either mean 
 <code><a href="ClassifyResult-class.html">ClassifyResult</a></code> object, with new metric values in the
 <code>performance</code> slot. If <code>calcExternalPerformance</code> was run, the
 performance metric value itself.</p>
+<p>For <code>easyHard</code>, a <code>DataFrame</code> of logistic regression model summary.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

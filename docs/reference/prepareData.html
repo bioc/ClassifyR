@@ -13,7 +13,7 @@ subsequent modelling."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,20 +67,14 @@ subsequent modelling.</p>
 <span><span class="fu">prepareData</span><span class="op">(</span></span>
 <span>  <span class="va">measurements</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
-<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  useFeatures <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  maxMissingProp <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  maxSimilarity <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  topNvariance <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'MultiAssayExperiment'</span></span>
-<span><span class="fu">prepareData</span><span class="op">(</span></span>
-<span>  <span class="va">measurements</span>,</span>
-<span>  outcomeColumns <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  useFeatures <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
+<span><span class="fu">prepareData</span><span class="op">(</span><span class="va">measurements</span>, outcomeColumns <span class="op">=</span> <span class="cn">NULL</span>, useFeatures <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'list'</span></span>
 <span><span class="fu">prepareData</span><span class="op">(</span><span class="va">measurements</span>, outcome <span class="op">=</span> <span class="cn">NULL</span>, useFeatures <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -110,10 +104,6 @@ containing either classes or time and event information about survival. If colum
 of survival information, time must be in first column and event status in the second.</p></dd>
 
 
-<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
-<dd><p>Not user-specified. Only passed by <code>runTests</code> for subsetting.</p></dd>
-
-
 <dt id="arg-usefeatures">useFeatures<a class="anchor" aria-label="anchor" href="#arg-usefeatures"></a></dt>
 <dd><p>Default: <code>NULL</code> (i.e. use all provided features). If <code>measurements</code> is a <code>MultiAssayExperiment</code> or list of tabular data,
 a named list of features to use. Otherwise, the input data is a single table and this can just be a vector of feature names.
@@ -124,6 +114,12 @@ This allows for the avoidance of variables such spike-in RNAs, sample IDs, sampl
 <dt id="arg-maxmissingprop">maxMissingProp<a class="anchor" aria-label="anchor" href="#arg-maxmissingprop"></a></dt>
 <dd><p>Default: 0.0. A proportion less than 1 which is the maximum
 tolerated proportion of missingness for a feature to be retained for modelling.</p></dd>
+
+
+<dt id="arg-maxsimilarity">maxSimilarity<a class="anchor" aria-label="anchor" href="#arg-maxsimilarity"></a></dt>
+<dd><p>Default: 1. A number between 0 and 1 which is the maximum similarity between a pair of
+variables to be both kept in the data set. For numerical variables, the Pearson correlation is used and for categorical variables,
+the Chi-squared test p-value is used. For a pair that is too similar, the second variable will be excluded from the data set.</p></dd>
 
 
 <dt id="arg-topnvariance">topNvariance<a class="anchor" aria-label="anchor" href="#arg-topnvariance"></a></dt>

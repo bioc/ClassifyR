@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClassifyR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.10.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,15 +74,17 @@
     
     
 <p>When a choice about a model to use is made and specified to
-<code>crossValidate</code>, performance tuning of a range of typical
-values is automatically made. These values can be changed or removed.
-Below is a table of models and their default values, which can be
-changed by specifying the <code>extraParams</code> parameter. It is a
-list with named elements. Each element must be named one of
-<code>"select"</code>, <code>"train"</code> or <code>"predict"</code>
-(as well as <code>"prepare"</code> for data preparation which is not a
-parameter tuning operation, so is not discussed here), to identify which
-modelling the parameter corresponds to.</p>
+<code>crossValidate</code>, performance tuning won’t happen
+automatically, but a range of typical values may be tried by specifying
+<code>tuneParams</code> to be <code>"auto"</code> instead of
+<code>"none"</code>. These values can be changed or removed. Below is a
+table of models and their default values, which can be changed by
+specifying the <code>extraParams</code> parameter. It is a list with
+named elements. Each element must be named one of <code>"select"</code>,
+<code>"train"</code> or <code>"predict"</code> (as well as
+<code>"prepare"</code> for data preparation which is not a parameter
+tuning operation, so is not discussed here), to identify which modelling
+the parameter corresponds to.</p>
 <table class="table">
 <colgroup>
 <col width="18%">
@@ -131,7 +133,7 @@ modelling the parameter corresponds to.</p>
 <td>k Nearest Neighbours</td>
 <td align="center"><code>"kNN"</code></td>
 <td align="center"><code>k = 1:5</code></td>
-<td align="center">See <code><a href="https://rdrr.io/pkg/class/man/knn.html" class="external-link">?class::knn</a></code>
+<td align="center">See <code><a href="https://rdrr.io/pkg/BiocNeighbors/man/queryKNN.html" class="external-link">?BiocNeighbors::queryKNN</a></code>
 </td>
 </tr>
 <tr class="odd">
