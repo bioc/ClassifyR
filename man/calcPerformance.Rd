@@ -17,22 +17,29 @@ Pair of Factor Vectors}
 \S4method{calcExternalPerformance}{factor,factor}(
   actualOutcome,
   predictedOutcome,
-  performanceTypes = "auto"
+  performanceTypes = "auto",
+  grouping = c("permutation", "fold")
 )
 
 \S4method{calcExternalPerformance}{Surv,numeric}(
   actualOutcome,
   predictedOutcome,
-  performanceTypes = "auto"
+  performanceTypes = "auto",
+  grouping = c("permutation", "fold")
 )
 
 \S4method{calcExternalPerformance}{factor,tabular}(
   actualOutcome,
   predictedOutcome,
-  performanceTypes = "auto"
+  performanceTypes = "auto",
+  grouping = c("permutation", "fold")
 )
 
-\S4method{calcCVperformance}{ClassifyResult}(result, performanceTypes = "auto")
+\S4method{calcCVperformance}{ClassifyResult}(
+  result,
+  performanceTypes = "auto",
+  grouping = c("permutation", "fold")
+)
 
 performanceTable(
   resultsList,
@@ -85,6 +92,11 @@ there are two classes.}
 \item{\code{"C-index"}: For survival data, the concordance index, for models which produce risk scores. Ranges from 0 to 1.}
 \item{\code{"Sample C-index"}: Per-individual C-index.}
 }}
+
+\item{grouping}{Default: \code{"permutation"}. If the cross-validation was k-fold, then this determines whether the metric will be calculated for samples
+grouped by permutation or by fold, if the value is \code{"fold"}. For small sample sizes, \code{"permutation"} would suit. But, for large sample sizes,
+\code{"fold"} would be preferable, as class membership probabilities or risk scores are not directly comparable between folds. This setting makes
+no difference to error or accuracy metrics, apart from their variability.}
 
 \item{result}{An object of class \code{\link{ClassifyResult}}.}
 

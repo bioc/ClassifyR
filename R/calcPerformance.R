@@ -65,6 +65,10 @@
 #' 
 #' @param actualOutcome A factor vector or survival information specifying each sample's known outcome.
 #' @param predictedOutcome A factor vector or survival information of the same length as \code{actualOutcome} specifying each sample's predicted outcome.
+#' @param grouping Default: \code{"permutation"}. If the cross-validation was k-fold, then this determines whether the metric will be calculated for samples
+#' grouped by permutation or by fold, if the value is \code{"fold"}. For small sample sizes, \code{"permutation"} would suit. But, for large sample sizes,
+#' \code{"fold"} would be preferable, as class membership probabilities or risk scores are not directly comparable between folds. This setting makes
+#' no difference to error or accuracy metrics, apart from their variability.
 #' 
 #' @return If \code{calcCVperformance} was run, an updated
 #' \code{\linkS4class{ClassifyResult}} object, with new metric values in the
@@ -94,8 +98,9 @@ standardGeneric("calcExternalPerformance"))
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("factor", "factor"),
           function(actualOutcome, predictedOutcome, # Both are classes.
-                   performanceTypes = "auto")
+                   performanceTypes = "auto", grouping = c("permutation", "fold"))
 {
+  grouping <- match.arg(grouping)
   if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "Balanced Accuracy"
               
   if(length(levels(actualOutcome)) > 2 && performanceTypes == "Matthews Correlation Coefficient")
@@ -110,8 +115,9 @@ setMethod("calcExternalPerformance", c("factor", "factor"),
 #' @rdname calcPerformance
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("Surv", "numeric"),
-          function(actualOutcome, predictedOutcome, performanceTypes = "auto")
+          function(actualOutcome, predictedOutcome, performanceTypes = "auto", grouping = c("permutation", "fold"))
           {
+            grouping <- match.arg(grouping)
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "C-index"
             
             sapply(performanceTypes, function(performanceType)
@@ -122,8 +128,9 @@ setMethod("calcExternalPerformance", c("Surv", "numeric"),
 #' @rdname calcPerformance
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("factor", "tabular"), # table has class probabilities per sample.
-          function(actualOutcome, predictedOutcome, performanceTypes = "auto")
+          function(actualOutcome, predictedOutcome, performanceTypes = "auto", grouping = c("permutation", "fold"))
           {
+            grouping <- match.arg(grouping)
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "AUC"
             
             sapply(performanceTypes, function(performanceType)
@@ -145,10 +152,12 @@ setGeneric("calcCVperformance", function(result, ...)
 #' @rdname calcPerformance
 #' @exportMethod calcCVperformance
 setMethod("calcCVperformance", "ClassifyResult",
-          function(result, performanceTypes = "auto")
+          function(result, performanceTypes = "auto", grouping = c("permutation", "fold"))
 {
   actualOutcome <- actualOutcome(result) # Extract the known outcome of each sample.
   actualOutcomeOrdered <- actualOutcome[match(result@predictions[, "sample"], sampleNames(result))]
+  grouping <- match.arg(grouping)
+  
   if(length(performanceTypes) == 1 && performanceTypes == "auto")
   {
       if(is.factor(actualOutcome))
@@ -167,15 +176,16 @@ setMethod("calcCVperformance", "ClassifyResult",
       {
         if("fold" %in% colnames(result@predictions)) # k-Fold or repeated k-Fold cross-validation.
         {
-          grouping <- result@predictions[, "fold"]
-          if("permutation" %in% colnames(result@predictions))
-            grouping <- paste(result@predictions[, "permutation"], grouping, sep = ':')
+          if(grouping == "permutation")
+            groupID <- result@predictions[, "permutation"]
+          else
+            groupID <- paste(result@predictions[, "permutation"], result@predictions[, "fold"], sep = ':')
         } else if("permutation" %in% colnames(result@predictions)) # Monte Carlo cross-validation.
         {
-          grouping <- result@predictions[, "permutation"]      
+          groupID <- result@predictions[, "permutation"]      
         } 
         else { # Leave-k-out or independent train and test set, such as created by runTest function.
-          grouping <- rep(1, nrow(result@predictions))
+          groupID <- rep(1, nrow(result@predictions))
         }
       }
       
@@ -186,7 +196,7 @@ setMethod("calcCVperformance", "ClassifyResult",
                                         predictedOutcome = result@predictions[, "risk"], 
                                         samples = samples,
                                         performanceType = performanceType, 
-                                        grouping = grouping)
+                                        grouping = groupID)
         if(grepl(':', names(performance[["values"]])[1])) # Then average for each permutation.
         {
           performance[["values"]] <- by(performance[["values"]], sapply(strsplit(names(performance[["values"]]), ':'), '[', 1), mean)
