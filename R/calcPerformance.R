@@ -108,7 +108,7 @@ setMethod("calcExternalPerformance", c("factor", "factor"),
   if(is(predictedOutcome, "factor")) levels(predictedOutcome) <- levels(actualOutcome)
   
   sapply(performanceTypes, function(performanceType)
-    .calcPerformance(list(actualOutcome), list(predictedOutcome), performanceType = performanceTypes)[["values"]]
+    .calcPerformance(list(actualOutcome), list(predictedOutcome), performanceType = performanceTypes, grouping = grouping)[["values"]]
   )
 })
 
@@ -121,7 +121,7 @@ setMethod("calcExternalPerformance", c("Surv", "numeric"),
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "C-index"
             
             sapply(performanceTypes, function(performanceType)
-              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType)[["values"]]
+              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType, grouping = grouping)[["values"]]
             )
           })
 
@@ -134,7 +134,7 @@ setMethod("calcExternalPerformance", c("factor", "tabular"), # table has class p
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "AUC"
             
             sapply(performanceTypes, function(performanceType)
-              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType)[["values"]]
+              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType, grouping = grouping)[["values"]]
             )
           })
 
@@ -207,7 +207,7 @@ setMethod("calcCVperformance", "ClassifyResult",
       if(performanceType == "AUC") {
         performance <- .calcPerformance(actualOutcomeOrdered,
                                         result@predictions[, levels(actualOutcome)],
-                                        performanceType = performanceType, grouping = grouping)
+                                        performanceType = performanceType, grouping = groupID)
         if(grepl(':', names(performance[["values"]])[1])) # Then average for each permutation.
         {
           permuteID <- sapply(strsplit(names(performance[["values"]]), ':'), '[', 1)
@@ -230,7 +230,7 @@ setMethod("calcCVperformance", "ClassifyResult",
         samples <- factor(result@predictions[, "sample"], levels = sampleNames(result))
         predictedOutcome <- factor(result@predictions[, "class"], levels = classLevels)
         actualOutcome <- factor(actualOutcomeOrdered, levels = classLevels, ordered = TRUE)
-        performance <- .calcPerformance(actualOutcome, predictedOutcome, samples, performanceType, grouping)
+        performance <- .calcPerformance(actualOutcome, predictedOutcome, samples, performanceType, groupID)
         result@performance[[performance[["name"]]]] <- performance[["values"]]
       }
   }
