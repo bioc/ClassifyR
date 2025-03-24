@@ -2,6 +2,19 @@
 \title{ClassifyR News}
 \encoding{UTF-8}
 
+\section{Version 3.12.0}{\itemize{
+  \item
+  Metric calculation restored to permutation level by default, modifiable by parameter.
+  \item
+  \code{crissCrossValidate} has TOP mode.
+  \item
+  \code{easyHard} convenience function for calculating sample-specific accuracy and regressing covariates to it.
+  \item
+  Parameter tuning grid no longer executed by default.
+  \item
+  \code{crossValidate}'s formal parameters reduced.
+}}
+
 \section{Version 3.10.0}{\itemize{
   \item
   Metric calculation done at fold level rather than permutation level.
