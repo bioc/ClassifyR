@@ -24,7 +24,8 @@ flowchart(precisionPathways, ...)
 \method{flowchart}{PrecisionPathways}(
   precisionPathways,
   pathway,
-  nodeColours = c(assay = "#86C57C", class1 = "#ACCEE0", class2 = "#F47F72"),
+  orientation = c("horizontal", "vertical"),
+  nodeColours = c(assay = "snow3", class1 = "#9FA3E5", class2 = "#C37F8A"),
   ...
 )
 
@@ -33,7 +34,7 @@ strataPlot(precisionPathways, ...)
 \method{strataPlot}{PrecisionPathways}(
   precisionPathways,
   pathway,
-  classColours = c(class1 = "#4DAF4A", class2 = "#984EA3"),
+  classColours = c(class1 = "#3F48CC", class2 = "#880015"),
   ...
 )
 }
@@ -53,6 +54,8 @@ and the cost during ranking. Must sum to 1.}
 a default colour scheme will automatically be chosen.}
 
 \item{pathway}{A character vector of length 1 specifying which pathway to plot, e.g. "clinical-mRNA".}
+
+\item{orientation}{Default: \code{"horizontal"}. Either \code{"horizontal"} or \code{"vertical"}. Specifies the layout of the flowchart.}
 
 \item{nodeColours}{A named vector of colours with names being \code{"assay"}, \code{"class1"},\code{"class2"}.
 a default colour scheme will automatically be chosen.}

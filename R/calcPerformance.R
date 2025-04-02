@@ -98,9 +98,8 @@ standardGeneric("calcExternalPerformance"))
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("factor", "factor"),
           function(actualOutcome, predictedOutcome, # Both are classes.
-                   performanceTypes = "auto", grouping = c("permutation", "fold"))
+                   performanceTypes = "auto")
 {
-  grouping <- match.arg(grouping)
   if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "Balanced Accuracy"
               
   if(length(levels(actualOutcome)) > 2 && performanceTypes == "Matthews Correlation Coefficient")
@@ -108,33 +107,31 @@ setMethod("calcExternalPerformance", c("factor", "factor"),
   if(is(predictedOutcome, "factor")) levels(predictedOutcome) <- levels(actualOutcome)
   
   sapply(performanceTypes, function(performanceType)
-    .calcPerformance(list(actualOutcome), list(predictedOutcome), performanceType = performanceTypes, grouping = grouping)[["values"]]
+    .calcPerformance(list(actualOutcome), list(predictedOutcome), performanceType = performanceTypes)[["values"]]
   )
 })
 
 #' @rdname calcPerformance
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("Surv", "numeric"),
-          function(actualOutcome, predictedOutcome, performanceTypes = "auto", grouping = c("permutation", "fold"))
+          function(actualOutcome, predictedOutcome, performanceTypes = "auto")
           {
-            grouping <- match.arg(grouping)
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "C-index"
             
             sapply(performanceTypes, function(performanceType)
-              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType, grouping = grouping)[["values"]]
+              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType)[["values"]]
             )
           })
 
 #' @rdname calcPerformance
 #' @exportMethod calcExternalPerformance
 setMethod("calcExternalPerformance", c("factor", "tabular"), # table has class probabilities per sample.
-          function(actualOutcome, predictedOutcome, performanceTypes = "auto", grouping = c("permutation", "fold"))
+          function(actualOutcome, predictedOutcome, performanceTypes = "auto")
           {
-            grouping <- match.arg(grouping)
             if(length(performanceTypes) == 1 && performanceTypes == "auto") performanceTypes <- "AUC"
             
             sapply(performanceTypes, function(performanceType)
-              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType, grouping = grouping)[["values"]]
+              .calcPerformance(actualOutcome, predictedOutcome, performanceType = performanceType)[["values"]]
             )
           })
 

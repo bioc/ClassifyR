@@ -282,6 +282,9 @@ setMethod("prepareData", "MultiAssayExperiment",
   {
     warning("No 'useFeatures' named list element for clincal data is specified. Clinical data often has\n", 
     "lots of uninformative variables. Please consider specifying useful features.")
+    if(is.null(useFeatures))
+      useFeatures <- list(clinical = colnames(MultiAssayExperiment::colData(measurements)))
+    else useFeatures[["clinical"]] <- colnames(MultiAssayExperiment::colData(measurements))
   }
 
   if(any(anyReplicated(measurements)))

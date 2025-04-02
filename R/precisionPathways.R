@@ -148,6 +148,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
               list(pathway = pathwayString,
                   individuals = individualsTableAll, tiers = tierTableAll)
             })
+
             names(precisionPathways) <- sapply(precisionPathways, "[[", "pathway")
             precisionPathways <- precisionPathways[unique(names(precisionPathways))] # In case early termination causes duplicates.
             result <- list(models = modelsList, assaysPermutations = assaysPermutations,
@@ -356,14 +357,19 @@ flowchart <- function (precisionPathways, ...) {
 
 #' @param precisionPathways A pathway of class \code{PrecisionPathways}.
 #' @param pathway A character vector of length 1 specifying which pathway to plot, e.g. "clinical-mRNA".
+#' @param orientation Default: \code{"horizontal"}. Either \code{"horizontal"} or \code{"vertical"}. Specifies the layout of the flowchart.
 #' @param nodeColours A named vector of colours with names being \code{"assay"}, \code{"class1"},\code{"class2"}.
 #' a default colour scheme will automatically be chosen.
 #' @rdname precisionPathwaysEvaluations
 #' @export
-flowchart.PrecisionPathways <- function(precisionPathways, pathway, nodeColours = c(assay = "#86C57C", class1 = "#ACCEE0", class2 = "#F47F72"), ...)
+flowchart.PrecisionPathways <- function(precisionPathways, pathway,
+                                        orientation = c("horizontal", "vertical"),
+                                        nodeColours = c(assay = "snow3", class1 = "#9FA3E5", class2 = "#C37F8A"), ...)
 {
   if(!requireNamespace("data.tree", quietly = TRUE))
     stop("The package 'data.tree' could not be found. Please install it.")
+  orientation <- match.arg(orientation)
+  orientation <- ifelse(orientation == "horizontal", "LR", "TB")
 
   pathwayUse <- precisionPathways[["pathways"]][[pathway]]
   assayIDs <- pathwayUse[["tiers"]][, 1]
@@ -411,7 +417,7 @@ flowchart.PrecisionPathways <- function(precisionPathways, pathway, nodeColours 
     return(label)
   }
           
-  data.tree::SetGraphStyle(pathwayTree, rankdir = "LR")
+  data.tree::SetGraphStyle(pathwayTree, rankdir = orientation)
   data.tree::SetEdgeStyle(pathwayTree, fontname = 'helvetica', label = .getEdgeLabel)
   data.tree::SetNodeStyle(pathwayTree, style = "filled", shape = .getNodeShape, fontcolor = "black", fillcolor = .getFillColour, fontname = 'helvetica')
   plot(pathwayTree)
@@ -435,7 +441,7 @@ strataPlot <- function (precisionPathways, ...) {
 #' a default colour scheme will automatically be chosen.
 #' @rdname precisionPathwaysEvaluations
 #' @export
-strataPlot.PrecisionPathways <- function(precisionPathways, pathway, classColours = c(class1 = "#4DAF4A", class2 = "#984EA3"), ...)
+strataPlot.PrecisionPathways <- function(precisionPathways, pathway, classColours = c(class1 = "#3F48CC", class2 = "#880015"), ...)
 {
   if(missing(pathway)) stop("'pathway' is not specified. Please specify one of the ones shown by printing the trained object.")    
   pathwayUse <- precisionPathways[["pathways"]][[pathway]]
@@ -454,7 +460,7 @@ strataPlot.PrecisionPathways <- function(precisionPathways, pathway, classColour
     ggplot2::guides(fill = ggplot2::guide_legend(title.position = "top")) +
     ggnewscale::new_scale_fill() +
     ggplot2::geom_tile(ggplot2::aes(fill = Accuracy)) +
-    ggplot2::scale_fill_gradient(low = "#377EB8", high = "#E41A1C") +
+    ggplot2::scale_fill_gradient2(low = "#86C57C", mid = "white", high = "#FFFF28", midpoint = 0.5) +
     ggplot2::labs(fill = "Accuracy") +
     ggplot2::guides(fill = ggplot2::guide_colorbar(title.position = "top")) +
     ggplot2::theme(panel.background = ggplot2::element_blank(),
