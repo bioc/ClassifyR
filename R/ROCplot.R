@@ -205,7 +205,7 @@ setMethod("ROCplot", "list",
   else
     lineColour <- comparison
   
-  if(lineColours == "auto")
+  if(length(lineColours) == 1 && lineColours == "auto")
       lineColours <- scales::hue_pal()(ifelse(lineColour == "class", numberDistinctClasses, max(characteristicsCounts)))
   if(is.null(legendTitle))
     legendTitle <- ifelse(lineColour == "class", "Class", comparisonName)
