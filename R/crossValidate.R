@@ -24,7 +24,7 @@
 #' \code{"select"}, \code{"train"}, \code{"predict"}, \code{tuneCross}. By default, no parameter tuning is done. To use the a default parameter range for tuning (see the article titled Parameter Tuning Presets for crossValidate and Their Customisation on
 #' the website), specify a list element of \code{"select"} or \code{"train"} lists named \code{"tuneParams"} with value \code{"auto"}. To specify your own range of values, specify a \code{list} with names being the parameters in the functions
 #' described in the same article on the website. For the valid element names in the \code{"prepare"} list, see \code{?prepareData} for its parameter names. The list \code{"tuneCross"} can have elements named \code{"tuneMode"} and \code{"performanceType"}. Valid values for \code{"tuneMode"} are \code{"Resubstitution"} or \code{"Nested CV"}. For \code{"performanceType"}, it is any of the metrics which can be specified to \code{\link{calcPerformance}}.
-#' @param nFeatures The number of features to be used for classification. If a named vector with the same names of multiple assays, 
+#' @param nFeatures The number of features to choose in the feature selection stage and use in the subsequent classifier training stage. If a named vector with the same names of multiple assays, 
 #' a different number of features will be used for each assay. Set to \code{"all"} if all features should be used. To tune it, specify a vector or \code{list} of named vectors to \code{"tuneParams"} list of
 #' \code{"select"} element list of \code{extraParams} list.
 #' @param selectionMethod Default: \code{"auto"}. A character vector of feature selection methods to compare. If a named character vector with names corresponding to different assays, 
@@ -118,6 +118,19 @@ setMethod("crossValidate", "DataFrame",
                 measurementsAndOutcome <- do.call(prepareData, prepParams)
                 measurements <- measurementsAndOutcome[["measurements"]]
                 outcome <- measurementsAndOutcome[["outcome"]]
+              }
+              
+              # Automatically set tuning mode if user has specified a range of nFeatures.
+              if(length(nFeatures) > 1)
+              {
+                if(is.null(extraParams))
+                {
+                  message("Tune mode is \"none\" but 'nFeatures' has multiple values. Setting to resubstitution performance.")
+                  extraParams <- list(tuneCross = list(tuneMode = "Resubstitution", performanceType = "auto"))
+                } else if(!"tuneCross" %in% names(extraParams)) {
+                  message("Tune mode is \"none\" but 'nFeatures' has multiple values. Setting to resubstitution performance.")
+                  extraParams[["tuneCross"]] <- list(tuneMode = "Resubstitution", performanceType = "auto")
+                }
               }
               
               # Ensure performance type is one of the ones that can be calculated by the package.
