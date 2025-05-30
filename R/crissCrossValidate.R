@@ -48,7 +48,6 @@ crissCrossValidate <- function(measurements, outcomes,
     if(!requireNamespace("TOP", quietly = TRUE))
         stop("The package 'TOP' could not be found. Please install it.")
     
-    returnType <- match.arg(returnType)
     trainType <- match.arg(trainType)
     
     if(!is.list(measurements)) stop("'measurements' is not of type list but is of type", class(measurements))
