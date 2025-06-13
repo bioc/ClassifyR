@@ -3,14 +3,11 @@ SVMtrainInterface <- function(measurementsTrain, classesTrain, ..., verbose = 3)
 {
   if(!requireNamespace("e1071", quietly = TRUE))
     stop("The package 'e1071' could not be found. Please install it.")
-    
-  # Classifier requires matrix input data type.
-  trainingMatrix <- as.matrix(measurementsTrain)
   
   if(verbose == 3)
     message(Sys.time(), ": Fitting SVM classifier to data.")
-  
-  trained <- e1071::svm(trainingMatrix, classesTrain, probability = TRUE, ...)
+  allVariables <- cbind(measurementsTrain, classesTrain) 
+  trained <- e1071::svm(classesTrain ~ ., data = allVariables, probability = TRUE, ...)
   
   if(ncol(trainingMatrix) == 1) # Handle inconsistency by e1071 to not always name columns.
       colnames(trained[["SV"]]) <- colnames(trainingMatrix)

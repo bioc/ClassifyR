@@ -56,7 +56,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
             }
             if(is.null(useFeatures) && fixedAssays == "clinical")
             {
-              warning("No 'useFeatures' named list element for clincal data is specified. Clinical data often has\n", 
+              warning("No 'useFeatures' named list element for clinical data is specified. Clinical data often has\n", 
     "lots of uninformative variables. Please consider specifying useful features.")        
               useFeatures <- list(clinical = colnames(MultiAssayExperiment::colData(measurements)))
             }

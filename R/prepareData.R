@@ -280,7 +280,7 @@ setMethod("prepareData", "MultiAssayExperiment",
 {
   if(is.null(useFeatures) || !"clinical" %in% names(useFeatures))
   {
-    warning("No 'useFeatures' named list element for clincal data is specified. Clinical data often has\n", 
+    warning("No 'useFeatures' named list element for clinical data is specified. Clinical data often has\n", 
     "lots of uninformative variables. Please consider specifying useful features.")
     if(is.null(useFeatures))
       useFeatures <- list(clinical = colnames(MultiAssayExperiment::colData(measurements)))
