@@ -151,6 +151,7 @@ setMethod("samplesMetricMap", "list",
                      result@characteristics[useRow, "value"]
                     })
   
+  
   metrics <- unlist(lapply(results, function(result)
     if(!is.null(result@performance)) names(result@performance)))
   namesCounts <- table(metrics)
@@ -189,34 +190,38 @@ setMethod("samplesMetricMap", "list",
     })
   } else {knownClasses <- NULL}
 
-  meanMetricCategory <- colMeans(do.call(rbind, metricValues))
+  metricMatrix <- do.call(rbind, metricValues)
+  meanMetricCategory <- colMeans(metricMatrix, na.rm = TRUE)
+  meanCharacteristic <- rowMeans(metricMatrix, na.rm = TRUE)
+
   if(metric == "Sample Error")
     meanMetricCategory <- meanMetricCategory * -1 # For sorting purposes.
   
   if(is.null(featureValues))
   {
     if(metric != "Sample C-index") # Sort within each class.
-      ordering <- order(knownClasses, meanMetricCategory)
+      colOrder <- order(knownClasses, meanMetricCategory)
     else # Sort all samples together.
-      ordering <- order(meanMetricCategory)    
+      colOrder <- order(meanMetricCategory)    
   } else {
     featureValues <- featureValues[match(sampleNames(results[[1]]), names(featureValues))]
     #featureValues <- featureValues[match(results[[1]]@performance[[metric]], names(featureValues))]
     if(metric != "Sample C-index") # Sort within each class.
-      ordering <- order(knownClasses, featureValues, meanMetricCategory)
+      colOrder <- order(knownClasses, featureValues, meanMetricCategory)
     else # Sort all samples together.
-      ordering <- order(featureValues, meanMetricCategory)
+      colOrder <- order(featureValues, meanMetricCategory)
   }
   if(metric != "Sample C-index")
-    knownClasses <- knownClasses[ordering]
+    knownClasses <- knownClasses[colOrder]
   if(!is.null(featureValues))
-    featureValues <- featureValues[ordering]
+    featureValues <- featureValues[colOrder]
   
-  metricValues <- lapply(metricValues, function(resultMetricValues) resultMetricValues[ordering])
-  if(metric != "Sample C-index") classedMetricValues <- lapply(classedMetricValues, function(resultmetricValues) resultmetricValues[ordering])
+  metricValues <- lapply(metricValues, function(resultMetricValues) resultMetricValues[colOrder])
+  if(metric != "Sample C-index") classedMetricValues <- lapply(classedMetricValues, function(resultmetricValues) resultmetricValues[colOrder])
   
-  plotData <- data.frame(name = factor(rep(sampleNames(results[[1]])[ordering], length(results)), levels = sampleNames(results[[1]])[ordering]),
-                         type = factor(rep(compareFactor, sapply(metricValues, length)), levels = rev(compareFactor)),
+  rowOrder <- order(meanCharacteristic, decreasing = TRUE)
+  plotData <- data.frame(name = factor(rep(sampleNames(results[[1]])[colOrder], length(results)), levels = sampleNames(results[[1]])[colOrder]),
+                         type = factor(rep(compareFactor, sapply(metricValues, length)), levels = compareFactor[rowOrder]),
                          Metric = unlist(metricValues))
   
   if(metric != "Sample C-index") plotData <- cbind(plotData, class = rep(knownClasses, length(results)))
@@ -544,6 +549,7 @@ setMethod("samplesMetricMap", "matrix",
   {
     cut(result, metricBinEnds, include.lowest = TRUE)
   })
+  rowOrder <- order(rowMeans(metricValues), decreasing = TRUE)
   
   classedMetricValues <- lapply(metricValues, function(metricSet)
   {
@@ -556,21 +562,21 @@ setMethod("samplesMetricMap", "matrix",
     meanMetricCategory <- meanMetricCategory * -1 # For sorting purposes.
   if(is.null(featureValues))
   {    
-    ordering <- order(knownClasses, meanMetricCategory)
+    colOrder <- order(knownClasses, meanMetricCategory)
   } else {
     featureValues <- featureValues[match(sampleNames(results[[1]]), names(featureValues))]
-    ordering <- order(knownClasses, featureValues, meanMetricCategory)
+    colOrder <- order(knownClasses, featureValues, meanMetricCategory)
   }
   
-  knownClasses <- knownClasses[ordering]
+  knownClasses <- knownClasses[colOrder]
   if(!is.null(featureValues))
-    featureValues <- featureValues[ordering]
+    featureValues <- featureValues[colOrder]
   
-  metricValues <- lapply(metricValues, function(resultmetricValues) resultmetricValues[ordering])
-  classedMetricValues <- lapply(classedMetricValues, function(resultmetricValues) resultmetricValues[ordering])
-  sampleIDs <- sampleIDs[ordering]
+  metricValues <- lapply(metricValues, function(resultmetricValues) resultmetricValues[colOrder])
+  classedMetricValues <- lapply(classedMetricValues, function(resultmetricValues) resultmetricValues[colOrder])
+  sampleIDs <- sampleIDs[colOrder]
   plotData <- data.frame(name = factor(rep(sampleIDs, length(characteristic)), levels = sampleIDs),
-                         type = factor(rep(characteristic, each = length(sampleIDs)), levels = rev(characteristic)),
+                         type = factor(rep(characteristic, each = length(sampleIDs)), levels = characteristic[rowOrder]),
                          class = rep(knownClasses, length(characteristic)),
                          Metric = unlist(metricValues))
 
