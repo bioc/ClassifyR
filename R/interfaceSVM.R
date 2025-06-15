@@ -28,8 +28,7 @@ SVMpredictInterface <- function(model, measurementsTest, returnType = c("both", 
   
   # Prediction function depends on test data having same set of columns in same order as
   # selected features used for training.
-  colnames(measurementsTest) <- make.names(colnames(measurementsTest))
-  measurementsTest <- measurementsTest[, colnames(model[["SV"]])]
+  measurementsTest <- model.matrix(~ ., data = measurementsTest)
   classPredictions <- predict(model, measurementsTest, probability = TRUE)
   
   # e1071 uses attributes to pass back probabilities. Make them a standalone variable.
