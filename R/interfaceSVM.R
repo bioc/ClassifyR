@@ -9,8 +9,8 @@ SVMtrainInterface <- function(measurementsTrain, classesTrain, ..., verbose = 3)
   allVariables <- cbind(measurementsTrain, classesTrain) 
   trained <- e1071::svm(classesTrain ~ ., data = allVariables, probability = TRUE, ...)
   
-  if(ncol(trainingMatrix) == 1) # Handle inconsistency by e1071 to not always name columns.
-      colnames(trained[["SV"]]) <- colnames(trainingMatrix)
+  if(ncol(measurementsTrain) == 1) # Handle inconsistency by e1071 to not always name columns.
+      colnames(trained[["SV"]]) <- colnames(measurementsTrain)
   
   trained
 }
