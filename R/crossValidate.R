@@ -1059,6 +1059,7 @@ predict.trainedByClassifyR <- function(object, newData, outcome, ...)
   if(is(newData, "tabular")) # Simply tabular data.
   {
     colnames(newData) <- make.names(colnames(newData)) # Ensure that feature names are syntactically valid, like during model fitting.
+    if(is.character(outcome)) outcome <- make.names(outcome)
   } else if(is.list(newData) && !is(object, "listOfModels")) # Don't check all those conditions that train function does.
   { # Merge the list of data tables and keep track of assay names in columns' metadata.
     newData <- mapply(function(meas, nam){

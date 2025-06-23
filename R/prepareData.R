@@ -79,7 +79,7 @@ setMethod("prepareData", "DataFrame",
     } else { # outcome contains decimal numbers.
       stop("'outcome' is continuous. Regression functionality is not provided.")
     }
-  }      
+  } 
       
   # Won't ever be true if input data was MultiAssayExperiment because wideFormat already produces valid names.  
   # Need to check if input data was DataFrame because names might not be valid from user.
@@ -88,6 +88,7 @@ setMethod("prepareData", "DataFrame",
     warning("Unsafe feature names in input data. Converted into safe names.")
     S4Vectors::mcols(measurements)$feature <- colnames(measurements) # Save the originals.
     colnames(measurements) <- make.names(colnames(measurements)) # Ensure column names are safe names.
+    if(is.character(outcome)) outcome <- make.names(outcome) # Also, the outcome column name might need taming.
   }
       
  # DataFrame's outcome variable can be character or factor, so it is a bit involved.
@@ -95,6 +96,10 @@ setMethod("prepareData", "DataFrame",
     stop("'outcome' is a character variable but has more than one element. Either provide a\n",
          "       one to three column names or a factor of the same length as the number of samples.")
 
+  # Filter any variable that is all the same. Causes problems, particularly for linear models in base R.
+  keep <- apply(measurements, 2, function(covariate) if(length(unique(covariate)) == 1) FALSE else TRUE)
+  measurements <- measurements[, keep]
+      
   ## String specifies the name of a single outcome column, typically a class.
   if(is.character(outcome) && length(outcome) == 1)
   {
