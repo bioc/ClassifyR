@@ -49,6 +49,11 @@ crissCrossValidate <- function(measurements, outcomes,
         stop("The package 'TOP' could not be found. Please install it.")
     
     trainType <- match.arg(trainType)
+    extraParams <- NULL
+    if(length(nFeatures) > 1) # Tune the choice of top number of features.
+    {
+      extraParams <- list(tuneCross = list(tuneMode = selectionOptimisation, performanceType = performanceType))
+    }
     
     if(!is.list(measurements)) stop("'measurements' is not of type list but is of type", class(measurements))
     if(is.null(names(measurements))) stop("Each element of 'measurements' must be named by the name of the data set.")
@@ -102,7 +107,7 @@ crissCrossValidate <- function(measurements, outcomes,
         # Predict on each dataset
         performanceAllPairs <- lapply(trainedModels, function(trainedModel) {
             mapply(function(testData, testOutcomes) {
-                predictions <- predict(trainedModel, testData, verbose = verbose)
+                predictions <- predict(trainedModel, testData, outcome = NULL, verbose = verbose)
                 
                 if (performanceType == "AUC") {
                     # Must have columns named after each factor level for multi-class AUC
@@ -148,17 +153,17 @@ crissCrossValidate <- function(measurements, outcomes,
             crossValidate(measurementsOne, outcomesOne,
                           nFeatures             = nFeatures,
                           selectionMethod       = selectionMethod,
-                          selectionOptimisation = selectionOptimisation,
                           classifier            = classifier,
                           multiViewMethod       = "none",
                           nFolds                = nFolds,
                           nCores                = nCores,
                           nRepeats              = nRepeats,
+                          extraParams           = extraParams,
                           verbose               = verbose)
         }, measurements, outcomes, SIMPLIFY = FALSE)
         
         # Build cross-validation parameters
-        crossValParams <- generateCrossValParams(nRepeats, nFolds, nCores, selectionOptimisation)
+        crossValParams <- generateCrossValParams(nRepeats, nFolds, nCores, extraParams)
         
         # Evaluate each "trainedModel" on all datasets
         performanceAllPairs <- lapply(trainedModels, function(trainedModel) {
