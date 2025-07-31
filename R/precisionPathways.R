@@ -17,10 +17,14 @@
 #' Assays with less features won't be reduced in size.
 #' @param fixedAssays A character vector of assay names specifying any assays which must be at the
 #' beginning of the pathway.
-#' @param confidenceCutoff The minimum confidence of predictions for a sample to be predicted by a particular issue
-#' . If a sample was predicted to belong to a particular class a proportion \eqn{p} times, then the confidence is \eqn{2 \times |p - 0.5|}.
+#' @param confidenceCutoff The minimum confidence of predictions for a sample to be predicted by a particular assay. If a sample
+#' was predicted to belong to a particular class a proportion \eqn{p} times, then the confidence is \eqn{2 \times |p - 0.5|}.
 #' @param minAssaySamples An integer specifying the minimum number of samples a tier may have. If a subsequent tier
 #' would have less than this number of samples, the samples are incorporated into the current tier.
+#' @param mode Default: \code{"stability"}. Either \code{"stability"} or \code{"combinatorial"}. If \code{"stability"}, then pathways grow by
+#' passing samples with confidence below \code{confidenceCutoff} to the next assay, until the assays are exhausted or the samples are.
+#' If \code{"combinatorial"}, then all possible combinations of assays respecting \code{fixedAssays}, as well as each assay individually
+#' are considered.
 #' @param nFeatures Default: 20. The number of features to consider during feature selection, if feature selection is done.
 #' @param selectionMethod A named character vector of feature selection methods to use for the assays, one for each. The names must correspond to names of \code{measurements}.
 #' @param classifier A named character vector of modelling methods to use for the assays, one for each. The names must correspond to names of \code{measurements}.
@@ -43,7 +47,7 @@ setGeneric("precisionPathwaysTrain", function(measurements, class, ...)
 #' @export
 setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList", 
           function(measurements, class, useFeatures = NULL, maxMissingProp = 0.0, topNvariance = NULL,
-                   fixedAssays = "clinical", confidenceCutoff = 0.8, minAssaySamples = 10,
+                   fixedAssays = "clinical", confidenceCutoff = 0.8, minAssaySamples = 10, mode = c("stability", "combinatorial"),
                    nFeatures = 20, selectionMethod = setNames(c("none", rep("t-test", length(measurements))), c("clinical", names(measurements))),
                    classifier = setNames(c("elasticNetGLM", rep("randomForest", length(measurements))), c("clinical", names(measurements))),
                    nFolds = 5, nRepeats = 20, nCores = 1)
@@ -60,6 +64,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
     "lots of uninformative variables. Please consider specifying useful features.")        
               useFeatures <- list(clinical = colnames(MultiAssayExperiment::colData(measurements)))
             }
+            mode <- match.arg(mode)
               
             prepArgs <- list(measurements, outcomeColumns = class, useFeatures = useFeatures,
                              maxMissingProp = maxMissingProp, topNvariance = topNvariance)
@@ -67,7 +72,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
               
             .precisionPathwaysTrain(measurementsAndClass[["measurements"]], measurementsAndClass[["outcome"]],
                                    useFeatures = useFeatures, fixedAssays = fixedAssays, confidenceCutoff = confidenceCutoff,
-                                   minAssaySamples = minAssaySamples, nFeatures = nFeatures,
+                                   minAssaySamples = minAssaySamples, mode = mode, nFeatures = nFeatures,
                                    selectionMethod = selectionMethod, classifier = classifier,
                                    nFolds = nFolds, nRepeats = nRepeats, nCores = nCores)
           })
@@ -75,7 +80,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
 # Internal method which carries out all of the processing, obtaining reformatted data from the
 # MultiAssayExperiment and list (of basic rectangular tables) S4 methods.
 .precisionPathwaysTrain <- function(measurements, class, fixedAssays = "clinical",
-                   useFeatures = useFeatures, confidenceCutoff = 0.8, minAssaySamples = 10,
+                   useFeatures = useFeatures, confidenceCutoff = 0.8, minAssaySamples = 10, mode,
                    nFeatures = 20, selectionMethod = setNames(c(NULL, rep("t-test", length(measurements))), c("clinical", names(measurements))),
                    classifier = setNames(c("elasticNetGLM", rep("randomForest", length(measurements))), c("clinical", names(measurements))),
                    nFolds = 5, nRepeats = 20, nCores = 1)
@@ -84,7 +89,29 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
             # assays to be used and which assays, if any, must be included.
             assayIDs <- unique(S4Vectors::mcols(measurements)[["assay"]])
             assaysPermutations <- .permutations(assayIDs, fixed = data.frame(seq_along(fixedAssays), fixedAssays))
-            permutationIDs <- apply(assaysPermutations, 2, function(permutation) paste(permutation, collapse = '-'))
+            assaysPermutations <- asplit(assaysPermutations, 2)
+            if(mode == "combinatorial")
+            {
+                subsetPermutations <- list()
+                variableAssays <- setdiff(assayIDs, fixedAssays)
+                nVariable <- 1
+                while((length(fixedAssays) + nVariable) < length(fixedAssays) + length(variableAssays))
+                {
+                    subsetCombinations <- combn(variableAssays, nVariable)
+                    subsetPermutations <- c(subsetPermutations, apply(subsetCombinations, 2, function(combination)
+                    {
+                        permutations <- .permutations(combination, NULL)
+                        if(is.matrix(permutations)) permutations <- asplit(permutations, 2)
+                        lapply(permutations, function(combinationPermutation) c(fixedAssays, combinationPermutation))
+                    }))
+                    nVariable <- nVariable + 1
+                }
+                subsetPermutations <- unlist(subsetPermutations, recursive = FALSE)
+                assaysPermutations <- c(assaysPermutations, subsetPermutations) # All subsets.
+                assaysPermutations <- c(assaysPermutations, assayIDs) # Each assay on its own.
+            }
+
+            permutationIDs <- lapply(assaysPermutations, function(permutation) paste(permutation, collapse = '-'))
             
             # Step 2: Build a classifier for each assay using all of the samples.
             modelsList <- crossValidate(measurements, class, nFeatures, selectionMethod,
@@ -94,7 +121,7 @@ setMethod("precisionPathwaysTrain", "MultiAssayExperimentOrList",
 
             # Step 3: Loop over each pathway and each assay in order to determine which samples are used at that level
             # and which are passed onwards.
-            precisionPathways <- lapply(as.data.frame(assaysPermutations), function(permutation)
+            precisionPathways <- lapply(assaysPermutations, function(permutation)
             {
               assaysProcessed <- character()
               samplesUsed <- character()
