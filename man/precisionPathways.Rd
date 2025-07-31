@@ -16,6 +16,7 @@
   fixedAssays = "clinical",
   confidenceCutoff = 0.8,
   minAssaySamples = 10,
+  mode = c("stability", "combinatorial"),
   nFeatures = 20,
   selectionMethod = setNames(c("none", rep("t-test", length(measurements))),
     c("clinical", names(measurements))),
@@ -47,11 +48,16 @@ Assays with less features won't be reduced in size.}
 \item{fixedAssays}{A character vector of assay names specifying any assays which must be at the
 beginning of the pathway.}
 
-\item{confidenceCutoff}{The minimum confidence of predictions for a sample to be predicted by a particular issue
-. If a sample was predicted to belong to a particular class a proportion \eqn{p} times, then the confidence is \eqn{2 \times |p - 0.5|}.}
+\item{confidenceCutoff}{The minimum confidence of predictions for a sample to be predicted by a particular assay. If a sample
+was predicted to belong to a particular class a proportion \eqn{p} times, then the confidence is \eqn{2 \times |p - 0.5|}.}
 
 \item{minAssaySamples}{An integer specifying the minimum number of samples a tier may have. If a subsequent tier
 would have less than this number of samples, the samples are incorporated into the current tier.}
+
+\item{mode}{Default: \code{"stability"}. Either \code{"stability"} or \code{"combinatorial"}. If \code{"stability"}, then pathways grow by
+passing samples with confidence below \code{confidenceCutoff} to the next assay, until the assays are exhausted or the samples are.
+If \code{"combinatorial"}, then all possible combinations of assays respecting \code{fixedAssays}, as well as each assay individually
+are considered.}
 
 \item{nFeatures}{Default: 20. The number of features to consider during feature selection, if feature selection is done.}
 
