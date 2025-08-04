@@ -346,8 +346,8 @@ crissCrossPlot <- function(crissCrossResult,
             xlab(xlab_text) +
             ylab(ylab_text) +
             theme(
-                axis.text.x = element_text(angle = 90, vjust = 1, size = 8, hjust = 1),
-                axis.text.y = element_text(vjust = 1, size = 8, hjust = 1)
+                axis.text.x = element_text(angle = 90, vjust = 1, size = 8, hjust = 1, colour = "black"),
+                axis.text.y = element_text(vjust = 1, size = 8, hjust = 1, colour = "black")
             ) +
             coord_fixed()
         
