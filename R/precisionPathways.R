@@ -391,7 +391,7 @@ flowchart <- function (precisionPathways, ...) {
 #' @export
 flowchart.PrecisionPathways <- function(precisionPathways, pathway,
                                         orientation = c("horizontal", "vertical"),
-                                        nodeColours = c(assay = "snow3", class1 = "#9FA3E5", class2 = "#C37F8A"), ...)
+                                        nodeColours = c(assay = "snow3", class1 = "#3F48CC", class2 = "#880015"), ...)
 {
   if(!requireNamespace("data.tree", quietly = TRUE))
     stop("The package 'data.tree' could not be found. Please install it.")
