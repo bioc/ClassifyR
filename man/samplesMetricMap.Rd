@@ -25,7 +25,7 @@
   showLegends = TRUE,
   xAxisLabel = "Sample Name",
   showXtickLabels = TRUE,
-  yAxisLabel = "Analysis",
+  yAxisLabel = "auto",
   showYtickLabels = TRUE,
   legendSize = grid::unit(1, "lines")
 )
@@ -53,7 +53,7 @@
 }
 \arguments{
 \item{results}{A list of \code{\link{ClassifyResult}} objects. Could also be
-a matrix of pre-calculated metrics, for backwards compatibility.}
+a \code{matrix} of pre-calculated metrics, for backwards compatibility.}
 
 \item{...}{Parameters not used by the \code{ClassifyResult} method that does
 list-packaging but used by the main \code{list} method.}
@@ -102,7 +102,10 @@ colour bar.}
 
 \item{showXtickLabels}{Logical. IF FALSE, the x-axis labels are hidden.}
 
-\item{yAxisLabel}{The name plotted for the y-axis. NULL suppresses label.}
+\item{yAxisLabel}{Default: \code{"auto"} for list of \code{ClassifyResult}s and
+\code{"Analysis"} for a \code{matrix}. The axis name plotted for the y-axis.
+If \code{"auto"}, automatically set depending on value of \code{comparison}.
+\code{NULL} suppresses the label.}
 
 \item{showYtickLabels}{Logical. IF FALSE, the y-axis labels are hidden.}
 
