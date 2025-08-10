@@ -213,7 +213,9 @@ input data. Autmomatically reducing to smaller number.")
   trained <- tryCatch(.doTrain(measurementsTrain, outcomeTrain, measurementsTest, outcomeTest, crossValParams, modellingParams, verbose),
                       error = function(error) error[["message"]])
   if(is.character(trained)) return(trained) # An error occurred.
-  
+  if(is.null(attr(trained[["model"]], "featuresForTrain"))) # Won't be NULL if previousTrained used to get an existing model.
+   attr(trained[["model"]], "featuresForTrain") <- colnames(measurementsTrain) # Used in precision pathways.
+
   tuneDetailsTrain <- trained[[2]] # Second element is tuning results.
   
   if(!is.null(modellingParams@trainParams@getFeatures)) # Features chosen inside classifier.

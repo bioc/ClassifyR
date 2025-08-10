@@ -372,6 +372,7 @@ splitsTestInfo <- function(samplesSplits = c("k-Fold", "Permute k-Fold", "Permut
 {
   if(!is.null(predictParams@predictor))
   {
+    measurementsTest <- measurementsTest[, attr(trained, "featuresForTrain")] # Ensure consistency with features used for training.
     paramList <- list(trained, measurementsTest)
     if(length(predictParams@otherParams) > 0) paramList <- c(paramList, predictParams@otherParams)
     paramList <- c(paramList, verbose = verbose)
@@ -580,7 +581,8 @@ splitsTestInfo <- function(samplesSplits = c("k-Fold", "Permute k-Fold", "Permut
         "mixturesNormals" = mixModelsParams(),
         "kNN" = kNNparams(),
         "CoxPH" = coxphParams(),
-        "CoxNet" = coxnetParams()
+        "CoxNet" = coxnetParams(),
+        "previousTrained" = list(TrainParams(previousTrained), NULL)
     )    
 }
 

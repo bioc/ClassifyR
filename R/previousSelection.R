@@ -11,10 +11,11 @@ previousSelection <- function(measurementsTrain, classesTrain, classifyResult, m
   {
     safeIDs <- intersect(make.names(previousIDs), featuresIDs)
   } else { # A data frame describing the assay and variable name of the chosen feature.
-    oldSafeIDs <- paste(previousIDs[, "assay"], previousIDs[, "feature"], sep = '_')
+    oldSafeIDs <- rownames(previousIDs)
+    oldSafeIDs <- gsub("clinical_", '', oldSafeIDs) # wideFormat doesn't prefix the clinical data, unlike all assays.
     safeIDs <- intersect(oldSafeIDs, featuresIDs)
   }
-  
+
   commonFeatures <- intersect(safeIDs, featuresIDs)
   overlapPercent <- length(commonFeatures) / length(safeIDs) * 100
   if(overlapPercent < minimumOverlapPercent)

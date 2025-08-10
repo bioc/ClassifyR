@@ -32,15 +32,12 @@ attr(penalisedGLMtrainInterface, "name") <- "penalisedGLMtrainInterface"
 
 # model is of class multnet
 penalisedGLMpredictInterface <- function(model, measurementsTest, lambda, ..., returnType = c("both", "class", "score"), verbose = 3)
-{
-  # ... just consumes emitted tuning variables from .doTrain which are unused.
+{# ... just consumes emitted tuning variables from .doTrain which are unused.
   returnType <- match.arg(returnType)
+
   # One-hot encoding needed.
-  measurementsTest <- MatrixModels::model.Matrix(~ 0 + ., data = measurementsTest)
-  
   # Ensure that testing data has same columns names in same order as training data.
-  # Remove those annoying backquotes which glmnet adds if variables have spaces in names.
-  measurementsTest <- measurementsTest[, gsub('`', '', rownames(model[["beta"]][[1]]))]
+  measurementsTest <- MatrixModels::model.Matrix(~ 0 + ., data = measurementsTest)
   
   if(!requireNamespace("glmnet", quietly = TRUE))
     stop("The package 'glmnet' could not be found. Please install it.")
@@ -49,9 +46,6 @@ penalisedGLMpredictInterface <- function(model, measurementsTest, lambda, ..., r
 
   if(missing(lambda)) # Tuning parameters are not passed to prediction functions.
     lambda <- attr(model, "tune")[["lambda"]] # Sneak it in as an attribute on the model.
-
-  
-  measurementsTest <- measurementsTest[, rownames(model[["beta"]][[1]])]
 
   classPredictions <- factor(as.character(predict(model, measurementsTest, s = lambda, type = "class")), levels = model[["classnames"]])
   classScores <- predict(model, measurementsTest, s = lambda, type = "response")[, , 1]
