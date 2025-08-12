@@ -222,14 +222,33 @@ setMethod("precisionPathwaysPredict", c("PrecisionPathways", "MultiAssayExperime
 
 .precisionPathwaysPredict <- function(pathways, measurements, class)
 {
-  # Step 1: Extract all of previously fitted models and permutations.
+  # Step 1: Extract all of previously fitted models and permutations. Create new predictions per assay.
   modelsList <- pathways[["models"]]
   assayIDs <- lapply(pathways[["models"]], function(model) model@characteristics[model@characteristics[, 1] == "Assay Name", 2])
   assaysPermutations <- strsplit(names(pathways[["pathways"]]), '-')
   confidenceCutoff <- pathways[["parameters"]][["confidenceCutoff"]]
   minAssaySamples <- pathways[["parameters"]][["minAssaySamples"]]
   classifiers <- pathways[["parameters"]][["classifier"]]
+  allSampleIDs <- rownames(measurements)
   
+  resultsNew <- mapply(function(fittedModel, classifierID)
+  {
+    trainParams <- TrainParams("previousTrained", classifyResult = fittedModel, intermediate = ".iteration")
+    predictPrams <- PredictParams(classifierID)
+    modelParams <- ModellingParams(selectParams = NULL, trainParams = trainParams, predictParams = predictPrams)
+    resultNew <- runTests(measurements, class, attr(modelsList, "crossValParams"), modelParams, verbose = 0)
+    resultNew <- calcCVperformance(resultNew, "Sample Accuracy")
+    predictsNew <- predictions(resultNew)
+    predictionsSamplesCounts <- table(predictsNew[, "sample"], predictsNew[, "class"])
+    sampleAccuracies <- performance(resultNew)[["Sample Accuracy"]]
+    confidences <- 2 * abs(predictionsSamplesCounts[, 1] / rowSums(predictionsSamplesCounts) - 0.5)
+    list(predictionsSamplesCounts, confidences, sampleAccuracies)
+  }, modelsList, classifiers, SIMPLIFY = FALSE)
+  predictionsSamplesCounts <- lapply(resultsNew, "[[", 1)
+  confidences <- lapply(resultsNew, "[[", 2)
+  sampleAccuracies <- lapply(resultsNew, "[[", 3)
+  names(predictionsSamplesCounts) <- names(confidences) <- names(sampleAccuracies) <- assayIDs
+
   # Step 2: Loop over each pathway and each assay in order to determine which samples are used at that level
   # and which are passed onwards.
   precisionPathways <- lapply(assaysPermutations, function(permutation)
@@ -242,21 +261,9 @@ setMethod("precisionPathwaysPredict", c("PrecisionPathways", "MultiAssayExperime
     for(assay in permutation)
     {
       # Step 2a: Identify new samples which are consistently predicted.
-      modelIndex <- match(assay, assayIDs)
-      fittedModel <- modelsList[[modelIndex]]
-      classifierID <- classifiers[match(assay, names(classifiers))]
-      
-      ## runTests with prior training for making predictions on new dataset's samples.
-      trainParams <- TrainParams("previousTrained", classifyResult = fittedModel, intermediate = ".iteration")
-      predictPrams <- PredictParams(classifierID)
-      modelParams <- ModellingParams(selectParams = NULL, trainParams = trainParams, predictParams = predictPrams)
-      resultNew <- runTests(measurements, class, attr(modelsList, "crossValParams"), modelParams)
-      resultNew <- calcCVperformance(resultNew, "Sample Accuracy")
-      allSampleIDs <- sampleNames(resultNew)
-      predictsNew <- predictions(resultNew)
-      predictionsSamplesCounts <- table(predictsNew[, "sample"], predictsNew[, "class"])
-      confidences <- 2 * abs(predictionsSamplesCounts[, 1] / rowSums(predictionsSamplesCounts) - 0.5)
-      sampleIDsUse <- names(confidences)[confidences > confidenceCutoff]
+      confidencesUse <- confidences[[assay]]
+      predictionsSamplesCountsUse <- predictionsSamplesCounts[[assay]]
+      sampleIDsUse <- names(confidencesUse)[confidencesUse > confidenceCutoff]
       sampleIDsUse <- setdiff(sampleIDsUse, samplesUsed)
                 
       # Check if too few samples left for next round. Include them in this round, if so.
@@ -268,18 +275,18 @@ setMethod("precisionPathwaysPredict", c("PrecisionPathways", "MultiAssayExperime
       }
       if(length(sampleIDsUse) == 0) next # No samples have sufficient confidence at this tier.
                 
-      predictionsSamplesCounts <- predictionsSamplesCounts[sampleIDsUse, , drop = FALSE]
+      predictionsSamplesCountsUse <- predictionsSamplesCountsUse[sampleIDsUse, , drop = FALSE]
                 
       # Step 2b: Individuals predictions and sample-wise accuracy, tier-wise error.
-      maxVotes <- apply(predictionsSamplesCounts, 1, function(sample) which.max(sample))
-      predictedClasses <- factor(colnames(predictionsSamplesCounts)[maxVotes],
-                                 levels = colnames(predictionsSamplesCounts))
+      maxVotes <- apply(predictionsSamplesCountsUse, 1, function(sample) which.max(sample))
+      predictedClasses <- factor(colnames(predictionsSamplesCountsUse)[maxVotes],
+                                 levels = colnames(predictionsSamplesCountsUse))
       individualsTable <- S4Vectors::DataFrame(Tier = assay,
                                                `Sample ID` = sampleIDsUse,
                                                `Predicted` = predictedClasses,
-                                               `Accuracy` = performance(resultNew)[["Sample Accuracy"]][sampleIDsUse],
+                                               `Accuracy` = sampleAccuracies[[assay]][sampleIDsUse],
                                                 check.names = FALSE)
-      knownClasses <- actualOutcome(resultNew)[match(sampleIDsUse, allSampleIDs)]
+      knownClasses <- class[match(sampleIDsUse, allSampleIDs)]
       balancedAccuracy <- calcExternalPerformance(knownClasses, predictedClasses)
       tierTable <- S4Vectors::DataFrame(Tier = assay,
                                         `Balanced Accuracy` = balancedAccuracy, check.names = FALSE)
@@ -372,6 +379,7 @@ summary.PrecisionPathways <- function(object, weights = c(accuracy = 0.5, cost =
   if(!is(finalScores, "tabular")) finalScores <- matrix(finalScores, nrow = 1)
   finalScores <- rowSums(finalScores)
   summaryTable <- cbind(summaryTable, Score = finalScores)
+  summaryTable <- summaryTable[order(summaryTable[, "Score"], decreasing = TRUE), ]
   summaryTable
 }
 
@@ -394,7 +402,7 @@ bubblePlot.PrecisionPathways <- function(precisionPathways, pathwayColours = NUL
   performance <- cbind(Sequence = rownames(performance), performance)
   ggplot2::ggplot(performance, aes(x = accuracy, y = cost, colour = Sequence, size = 4)) + ggplot2::geom_point() +
     ggplot2::scale_color_manual(values = pathwayColours) + ggplot2::labs(x = "Balanced Accuracy", y = "Total Cost") +
-    ggplot2::guides(size = "none") + ggplot2::scale_x_continuous(limits = c(0, 1)) + ggplot2::scale_y_continuous(limits = c(0, NA))
+    ggplot2::guides(size = "none") + ggplot2::scale_x_continuous(limits = c(0.5, NA)) + ggplot2::scale_y_continuous(limits = c(0, NA))
 }
 
 #' @export
@@ -469,7 +477,7 @@ flowchart.PrecisionPathways <- function(precisionPathways, pathway,
   data.tree::SetGraphStyle(pathwayTree, rankdir = orientation)
   data.tree::SetEdgeStyle(pathwayTree, fontname = 'helvetica', label = .getEdgeLabel)
   data.tree::SetNodeStyle(pathwayTree, style = "filled", shape = .getNodeShape, fontcolor = "black", fillcolor = .getFillColour, fontname = 'helvetica')
-  plot(pathwayTree)
+  pathwayTree
 }
 
 .getNodeShape <- function(node){
