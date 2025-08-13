@@ -913,6 +913,7 @@ train.DataFrame <- function(x, outcomeTrain, selectionMethod = "auto", nFeatures
                                   
                                   trained <- .doTrain(measurementsUse, outcomeTrain, NULL, NULL, CrossValParams(), modellingParams, verbose = verbose)[["model"]]
                                   attr(trained, "predictFunction") <- classifierParams$predictParams@predictor
+                                  attr(trained, "featuresForTrain") <- colnames(measurementsUse)
                                   trained
                                   ## train model
                                 }, simplify = FALSE)

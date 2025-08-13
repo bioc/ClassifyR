@@ -107,7 +107,7 @@ crissCrossValidate <- function(measurements, outcomes,
         # Predict on each dataset
         performanceAllPairs <- lapply(trainedModels, function(trainedModel) {
             mapply(function(testData, testOutcomes) {
-                predictions <- predict(trainedModel, testData, outcome = NULL, verbose = verbose)
+                predictions <- predict(trainedModel, testData[, attr(trainedModel, "featuresForTrain")], outcome = NULL, verbose = verbose)
                 
                 if (performanceType == "AUC") {
                     # Must have columns named after each factor level for multi-class AUC
