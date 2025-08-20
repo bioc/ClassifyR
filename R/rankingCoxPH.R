@@ -8,6 +8,7 @@ coxphRanking <- function(measurementsTrain, survivalTrain, verbose = 3) # Clinic
   if(any(isCat))
   {
     pValues[isCat] <- apply(measurementsTrain[, isCat, drop = FALSE], 2, function(featureColumn){
+      if(length(unique(featureColumn)) == 1) return(1)
       fit <- survival::coxph(survivalTrain ~ featureColumn)
       s <- summary(fit)
       s$waldtest["pvalue"]
