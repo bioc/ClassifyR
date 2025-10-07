@@ -37,7 +37,7 @@ iteration and confidence intervals to be drawn with the solid line being the
 averaged ROC curve.}
 
 \item{interval}{Default: 95 (percent). The percent confidence interval to
-draw around the averaged ROC curve, if mode is \code{"each"}.}
+draw around the averaged ROC curve, if mode is \code{"average"}.}
 
 \item{comparison}{Default: \code{"auto"}. The aspect of the experimental design to compare. Can be
 any characteristic that all results share. If the data set has two classes,

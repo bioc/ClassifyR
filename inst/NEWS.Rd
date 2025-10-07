@@ -2,6 +2,11 @@
 \title{ClassifyR News}
 \encoding{UTF-8}
 
+\section{Version 3.14.0}{\itemize{
+  \item
+  Precision pathways gains an all-combinations-of-all-subsets mode.
+}}
+
 \section{Version 3.12.0}{\itemize{
   \item
   Metric calculation restored to permutation level by default, modifiable by parameter.
